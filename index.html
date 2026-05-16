@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Purjehduskilpailu — 10 purjehtijaa, 4 venettä, 20 kisaa</title>
+<style>
+  :root {
+    --bg: #0a1628;
+    --card: #111d33;
+    --border: #1e3150;
+    --text: #e0e8f0;
+    --muted: #7a8da6;
+    --accent: #3b82f6;
+    --gold: #fbbf24;
+    --silver: #94a3b8;
+    --bronze: #d97706;
+    --green: #22c55e;
+    --red: #ef4444;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+    color: var(--accent);
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    padding: 8px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 0.85rem;
+    transition: all 0.15s;
+  }
+
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    background: var(--border);
+    color: var(--gold);
+    border-bottom-color: var(--border);
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Tulostaulu */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+
+  th, td {
+    padding: 6px 8px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+
+  th {
+    background: var(--card);
+    color: var(--muted);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  td { background: var(--bg); }
+
+  .rank-1 td:first-child { color: var(--gold); font-weight: bold; }
+  .rank-2 td:first-child { color: var(--silver); font-weight: bold; }
+  .rank-3 td:first-child { color: var(--bronze); font-weight: bold; }
+
+  .total-col {
+    font-weight: bold;
+    font-size: 0.95rem;
+    color: var(--green);
+  }
+
+  .name-col {
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.95rem;
+    min-width: 40px;
+  }
+
+  .dns { color: var(--muted); font-style: italic; }
+
+  /* Kisatulosten syöttö */
+  .race-input {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .race-input h3 {
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+  }
+
+  .race-selector {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .race-selector label { color: var(--muted); font-size: 0.85rem; }
+
+  select, button {
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  select:focus, button:focus { outline: 2px solid var(--accent); }
+
+  .boat-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .boat-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+  }
+
+  .boat-card h4 {
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+  }
+
+  .boat-card .sailor { color: var(--accent); font-weight: bold; margin-bottom: 6px; }
+
+  .position-btns {
+    display: flex;
+    gap: 4px;
+  }
+
+  .pos-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: all 0.15s;
+  }
+
+  .pos-btn:hover { transform: scale(1.1); }
+  .pos-btn.selected { outline: 3px solid var(--accent); }
+  .pos-btn.p1 { background: var(--gold); color: #000; }
+  .pos-btn.p2 { background: var(--silver); color: #000; }
+  .pos-btn.p3 { background: var(--bronze); color: #fff; }
+  .pos-btn.p4 { background: var(--red); color: #fff; }
+
+  .save-btn {
+    background: var(--accent);
+    color: #fff;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .save-btn:hover { background: #2563eb; }
+  .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .clear-btn {
+    background: var(--red);
+    color: #fff;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-left: 8px;
+  }
+
+  .clear-btn:hover { background: #dc2626; }
+
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Päiväohjelma */
+  .schedule-grid {
+    overflow-x: auto;
+  }
+
+  .schedule-grid table { min-width: 700px; }
+
+  .cell-sail {
+    background: #1e3a5f;
+    color: var(--accent);
+    font-weight: bold;
+  }
+
+  .cell-rest {
+    color: var(--border);
+  }
+
+  .cell-done {
+    background: #14532d;
+    color: var(--green);
+    font-weight: bold;
+  }
+
+  .cell-active {
+    background: #7c2d12;
+    color: var(--gold);
+    font-weight: bold;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .race-done-header { background: #14532d !important; color: var(--green) !important; }
+  .race-active-header { background: #7c2d12 !important; color: var(--gold) !important; }
+
+  .status-bar {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 16px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    flex-wrap: wrap;
+  }
+
+  .status-item span { color: var(--text); font-weight: bold; }
+
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--green);
+    color: #000;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 100;
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 600px) {
+    body { padding: 8px; }
+    th, td { padding: 3px 4px; font-size: 0.7rem; }
+    .boat-results { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Purjehduskilpailu 2025</h1>
+<p class="subtitle">10 purjehtijaa (A–J) · 4 venettä · 20 kisaa · vähiten pisteitä voittaa</p>
+
+<div class="status-bar">
+  <div class="status-item">Kisoja purjehdittu: <span id="races-done">0</span>/20</div>
+  <div class="status-item">Johdossa: <span id="leader">—</span></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('tulostaulu')">Tulostaulu</button>
+  <button class="tab" onclick="showTab('syotto')">Tulosten syöttö</button>
+  <button class="tab" onclick="showTab('aikataulu')">Aikataulu</button>
+  <button class="tab" onclick="showTab('paivaohjelma')">Päiväohjelma</button>
+  <button class="tab" onclick="showTab('tilastot')">Tilastot</button>
+</div>
+
+<div id="tulostaulu" class="panel active"></div>
+<div id="syotto" class="panel"></div>
+<div id="aikataulu" class="panel"></div>
+<div id="paivaohjelma" class="panel"></div>
+<div id="tilastot" class="panel"></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== KISADATA (generoitu Python-optimoijalla) =====
+const SAILORS = ['A','B','C','D','E','F','G','H','I','J'];
+const BOATS = [1,2,3,4];
+const NUM_RACES = 20;
+
+// Aikataulu: kisa -> {vene: purjehtija}
+const SCHEDULE = [
+  {1:'G',2:'A',3:'E',4:'I'},
+  {1:'C',2:'J',3:'B',4:'H'},
+  {1:'D',2:'F',3:'G',4:'J'},
+  {1:'B',2:'D',3:'A',4:'C'},
+  {1:'F',2:'H',3:'I',4:'E'},
+  {1:'I',2:'B',3:'J',4:'G'},
+  {1:'A',2:'C',3:'H',4:'D'},
+  {1:'E',2:'F',3:'D',4:'A'},
+  {1:'J',2:'G',3:'F',4:'B'},
+  {1:'H',2:'I',3:'C',4:'E'},
+  {1:'D',2:'A',3:'H',4:'G'},
+  {1:'B',2:'J',3:'C',4:'F'},
+  {1:'I',2:'E',3:'D',4:'F'},
+  {1:'A',2:'B',3:'I',4:'H'},
+  {1:'E',2:'G',3:'J',4:'C'},
+  {1:'G',2:'E',3:'F',4:'B'},
+  {1:'J',2:'D',3:'H',4:'I'},
+  {1:'C',2:'A',3:'E',4:'J'},
+  {1:'F',2:'I',3:'B',4:'A'},
+  {1:'H',2:'C',3:'G',4:'D'},
+];
+
+// ===== TULOSDATA (localStorage) =====
+function loadResults() {
+  try {
+    return JSON.parse(localStorage.getItem('purjehdus_results') || '{}');
+  } catch { return {}; }
+}
+
+function saveResults(results) {
+  localStorage.setItem('purjehdus_results', JSON.stringify(results));
+}
+
+let results = loadResults(); // { "0": {sailor: position}, "1": {...}, ... }
+
+// ===== TAB-VAIHTO =====
+function showTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  renderAll();
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===== PISTEENLASKU =====
+function getStandings() {
+  const points = {};
+  const raceCount = {};
+  const racePoints = {};
+
+  SAILORS.forEach(s => {
+    points[s] = 0;
+    raceCount[s] = 0;
+    racePoints[s] = [];
+  });
+
+  for (let r = 0; r < NUM_RACES; r++) {
+    if (!results[r]) continue;
+    const race = SCHEDULE[r];
+    Object.entries(race).forEach(([boat, sailor]) => {
+      if (results[r][sailor] !== undefined) {
+        points[sailor] += results[r][sailor];
+        raceCount[sailor]++;
+        racePoints[sailor].push({ race: r, pos: results[r][sailor] });
+      }
+    });
+  }
+
+  const standings = SAILORS.map(s => ({
+    sailor: s,
+    points: points[s],
+    races: raceCount[s],
+    racePoints: racePoints[s],
+  }));
+
+  standings.sort((a, b) => {
+    if (a.races === 0 && b.races === 0) return a.sailor.localeCompare(b.sailor);
+    if (a.races === 0) return 1;
+    if (b.races === 0) return -1;
+    if (a.points !== b.points) return a.points - b.points;
+    // Tiebreak: enemmän 1. sijoja
+    const a1 = a.racePoints.filter(r => r.pos === 1).length;
+    const b1 = b.racePoints.filter(r => r.pos === 1).length;
+    if (a1 !== b1) return b1 - a1;
+    return a.sailor.localeCompare(b.sailor);
+  });
+
+  return standings;
+}
+
+function getRacesDone() {
+  let count = 0;
+  for (let r = 0; r < NUM_RACES; r++) {
+    if (results[r] && Object.keys(results[r]).length === 4) count++;
+  }
+  return count;
+}
+
+// ===== RENDERÖINTI =====
+function renderAll() {
+  renderTulostaulu();
+  renderSyotto();
+  renderAikataulu();
+  renderPaivaohjelma();
+  renderTilastot();
+  updateStatus();
+}
+
+function updateStatus() {
+  const done = getRacesDone();
+  document.getElementById('races-done').textContent = done;
+  const standings = getStandings();
+  const leader = standings.find(s => s.races > 0);
+  document.getElementById('leader').textContent = leader
+    ? `${leader.sailor} (${leader.points} p)`
+    : '—';
+}
+
+function renderTulostaulu() {
+  const el = document.getElementById('tulostaulu');
+  const standings = getStandings();
+  const done = getRacesDone();
+
+  let html = '<div style="overflow-x:auto"><table>';
+  html += '<tr><th>#</th><th>Purjehtija</th><th class="total-col">Pisteet</th><th>Kisoja</th>';
+  for (let r = 0; r < NUM_RACES; r++) {
+    const isDone = results[r] && Object.keys(results[r]).length === 4;
+    html += `<th class="${isDone ? 'race-done-header' : ''}">${r+1}</th>`;
+  }
+  html += '</tr>';
+
+  standings.forEach((s, i) => {
+    const rank = i + 1;
+    const rankClass = rank <= 3 && s.races > 0 ? `rank-${rank}` : '';
+    html += `<tr class="${rankClass}">`;
+    html += `<td>${s.races > 0 ? rank : '—'}</td>`;
+    html += `<td class="name-col">${s.sailor}</td>`;
+    html += `<td class="total-col">${s.races > 0 ? s.points : '—'}</td>`;
+    html += `<td>${s.races}</td>`;
+
+    for (let r = 0; r < NUM_RACES; r++) {
+      const race = SCHEDULE[r];
+      const inRace = Object.values(race).includes(s.sailor);
+      if (!inRace) {
+        html += '<td class="dns">·</td>';
+      } else if (results[r] && results[r][s.sailor] !== undefined) {
+        const pos = results[r][s.sailor];
+        const colors = { 1: 'var(--gold)', 2: 'var(--silver)', 3: 'var(--bronze)', 4: 'var(--red)' };
+        html += `<td style="color:${colors[pos]};font-weight:bold">${pos}</td>`;
+      } else {
+        html += '<td>—</td>';
+      }
+    }
+    html += '</tr>';
+  });
+
+  html += '</table></div>';
+  el.innerHTML = html;
+}
+
+function renderSyotto() {
+  const el = document.getElementById('syotto');
+
+  // Etsi seuraava purjehtimaton kisa
+  let nextRace = 0;
+  for (let r = 0; r < NUM_RACES; r++) {
+    if (!results[r] || Object.keys(results[r]).length < 4) {
+      nextRace = r;
+      break;
+    }
+    if (r === NUM_RACES - 1) nextRace = NUM_RACES - 1;
+  }
+
+  let html = '<div class="race-input">';
+  html += '<h3>Syötä kisatulokset</h3>';
+
+  html += '<div class="race-selector">';
+  html += '<label>Valitse kisa:</label>';
+  html += '<select id="race-select" onchange="renderSyotto()">';
+  for (let r = 0; r < NUM_RACES; r++) {
+    const done = results[r] && Object.keys(results[r]).length === 4;
+    const sel = r === nextRace ? 'selected' : '';
+    html += `<option value="${r}" ${sel}>Kisa ${r+1} ${done ? '✓' : ''}</option>`;
+  }
+  html += '</select></div>';
+
+  const selEl = document.getElementById('race-select');
+  const raceIdx = selEl ? parseInt(selEl.value) : nextRace;
+  const race = SCHEDULE[raceIdx];
+  const existing = results[raceIdx] || {};
+
+  html += '<div class="boat-results">';
+  BOATS.forEach(boat => {
+    const sailor = race[boat];
+    const currentPos = existing[sailor];
+    html += `<div class="boat-card">`;
+    html += `<h4>Vene ${boat}</h4>`;
+    html += `<div class="sailor">${sailor}</div>`;
+    html += `<div class="position-btns">`;
+    for (let p = 1; p <= 4; p++) {
+      const sel = currentPos === p ? 'selected' : '';
+      const cls = `pos-btn p${p} ${sel}`;
+      html += `<button class="${cls}" onclick="setPosition(${raceIdx},'${sailor}',${p})">${p}</button>`;
+    }
+    html += '</div></div>';
+  });
+  html += '</div>';
+
+  html += '<div class="btn-row">';
+  html += `<button class="save-btn" onclick="saveRace(${raceIdx})">Tallenna kisa ${raceIdx+1}</button>`;
+  html += `<button class="clear-btn" onclick="clearRace(${raceIdx})">Tyhjennä</button>`;
+  html += '</div>';
+  html += '</div>';
+
+  el.innerHTML = html;
+}
+
+// Väliaikainen tila syötölle
+let tempPositions = {};
+
+function setPosition(raceIdx, sailor, pos) {
+  if (!tempPositions[raceIdx]) {
+    tempPositions[raceIdx] = { ...(results[raceIdx] || {}) };
+  }
+
+  // Tarkista ettei sama sijoitus ole jo käytössä
+  const race = SCHEDULE[raceIdx];
+  const sailors = Object.values(race);
+
+  // Poista vanha sijoitus tältä purjehtijalta
+  // Jos jollain muulla on sama sija, poista se
+  Object.keys(tempPositions[raceIdx]).forEach(s => {
+    if (tempPositions[raceIdx][s] === pos && s !== sailor) {
+      delete tempPositions[raceIdx][s];
+    }
+  });
+
+  tempPositions[raceIdx][sailor] = pos;
+  results[raceIdx] = { ...tempPositions[raceIdx] };
+  renderSyotto();
+}
+
+function saveRace(raceIdx) {
+  const race = SCHEDULE[raceIdx];
+  const sailors = Object.values(race);
+  const r = results[raceIdx] || {};
+
+  // Tarkista että kaikilla on sijoitus
+  const assigned = sailors.filter(s => r[s] !== undefined);
+  if (assigned.length < 4) {
+    toast('Anna sijoitus kaikille 4 purjehtijalle!');
+    return;
+  }
+
+  // Tarkista että kaikki sijoitukset 1-4 käytetty
+  const positions = assigned.map(s => r[s]).sort();
+  if (JSON.stringify(positions) !== '[1,2,3,4]') {
+    toast('Sijoitusten pitää olla 1, 2, 3 ja 4!');
+    return;
+  }
+
+  saveResults(results);
+  tempPositions[raceIdx] = {};
+  toast(`Kisa ${raceIdx + 1} tallennettu!`);
+  renderAll();
+}
+
+function clearRace(raceIdx) {
+  delete results[raceIdx];
+  delete tempPositions[raceIdx];
+  saveResults(results);
+  renderAll();
+  toast(`Kisa ${raceIdx + 1} tyhjennetty`);
+}
+
+function renderAikataulu() {
+  const el = document.getElementById('aikataulu');
+  let html = '<div style="overflow-x:auto"><table>';
+  html += '<tr><th>Kisa</th><th>Vene 1</th><th>Vene 2</th><th>Vene 3</th><th>Vene 4</th><th>Tauolla</th><th>Tila</th></tr>';
+
+  for (let r = 0; r < NUM_RACES; r++) {
+    const race = SCHEDULE[r];
+    const done = results[r] && Object.keys(results[r]).length === 4;
+    const inRace = Object.values(race);
+    const resting = SAILORS.filter(s => !inRace.includes(s)).join(' ');
+
+    html += '<tr>';
+    html += `<td style="font-weight:bold">${r+1}</td>`;
+    BOATS.forEach(b => {
+      html += `<td>${race[b]}</td>`;
+    });
+    html += `<td class="dns">${resting}</td>`;
+    html += `<td>${done ? '<span style="color:var(--green)">Valmis</span>' : '<span style="color:var(--muted)">—</span>'}</td>`;
+    html += '</tr>';
+  }
+
+  html += '</table></div>';
+  el.innerHTML = html;
+}
+
+function renderPaivaohjelma() {
+  const el = document.getElementById('paivaohjelma');
+  let html = '<div class="schedule-grid"><table>';
+
+  html += '<tr><th>Purjehtija</th>';
+  for (let r = 0; r < NUM_RACES; r++) {
+    const done = results[r] && Object.keys(results[r]).length === 4;
+    html += `<th class="${done ? 'race-done-header' : ''}">${r+1}</th>`;
+  }
+  html += '<th>Kisat</th><th>Max putki</th><th>Max tauko</th></tr>';
+
+  SAILORS.forEach(sailor => {
+    html += `<tr><td class="name-col">${sailor}</td>`;
+    let streak = 0, maxStreak = 0, gap = 0, maxGap = 0, raceCount = 0;
+
+    for (let r = 0; r < NUM_RACES; r++) {
+      const race = SCHEDULE[r];
+      const inRace = Object.values(race).includes(sailor);
+      const done = results[r] && Object.keys(results[r]).length === 4;
+
+      if (inRace) {
+        raceCount++;
+        streak++; maxStreak = Math.max(maxStreak, streak); gap = 0;
+        // Etsi vene
+        const boat = BOATS.find(b => race[b] === sailor);
+        let cls = 'cell-sail';
+        if (done) cls = 'cell-done';
+        html += `<td class="${cls}">V${boat}</td>`;
+      } else {
+        gap++; maxGap = Math.max(maxGap, gap); streak = 0;
+        html += `<td class="cell-rest">·</td>`;
+      }
+    }
+
+    html += `<td>${raceCount}</td>`;
+    html += `<td>${maxStreak}</td>`;
+    html += `<td>${maxGap}</td>`;
+    html += '</tr>';
+  });
+
+  html += '</table></div>';
+  el.innerHTML = html;
+}
+
+function renderTilastot() {
+  const el = document.getElementById('tilastot');
+  const standings = getStandings();
+  const done = getRacesDone();
+
+  let html = '';
+
+  if (done === 0) {
+    html = '<p style="color:var(--muted);text-align:center;padding:40px">Ei vielä tuloksia. Syötä kisatuloksia aloittaaksesi.</p>';
+    el.innerHTML = html;
+    return;
+  }
+
+  // Venejakauma
+  html += '<h3 style="color:var(--accent);margin-bottom:12px">Venejakauma per purjehtija</h3>';
+  html += '<div style="overflow-x:auto"><table>';
+  html += '<tr><th>Purjehtija</th><th>V1</th><th>V2</th><th>V3</th><th>V4</th><th>Yht.</th></tr>';
+
+  SAILORS.forEach(s => {
+    const counts = { 1: 0, 2: 0, 3: 0, 4: 0 };
+    for (let r = 0; r < NUM_RACES; r++) {
+      const race = SCHEDULE[r];
+      BOATS.forEach(b => { if (race[b] === s) counts[b]++; });
+    }
+    html += `<tr><td class="name-col">${s}</td>`;
+    BOATS.forEach(b => html += `<td>${counts[b]}</td>`);
+    html += `<td style="font-weight:bold">${Object.values(counts).reduce((a,b)=>a+b,0)}</td></tr>`;
+  });
+  html += '</table></div>';
+
+  // Sijoitusjakauma
+  html += '<h3 style="color:var(--accent);margin:20px 0 12px">Sijoitusjakauma</h3>';
+  html += '<div style="overflow-x:auto"><table>';
+  html += '<tr><th>Purjehtija</th><th style="color:var(--gold)">1. sija</th><th style="color:var(--silver)">2. sija</th><th style="color:var(--bronze)">3. sija</th><th style="color:var(--red)">4. sija</th><th>Keskim.</th></tr>';
+
+  standings.forEach(s => {
+    if (s.races === 0) return;
+    const dist = { 1: 0, 2: 0, 3: 0, 4: 0 };
+    s.racePoints.forEach(r => dist[r.pos]++);
+    const avg = (s.points / s.races).toFixed(2);
+    html += `<tr><td class="name-col">${s.sailor}</td>`;
+    html += `<td>${dist[1]}</td><td>${dist[2]}</td><td>${dist[3]}</td><td>${dist[4]}</td>`;
+    html += `<td style="font-weight:bold">${avg}</td></tr>`;
+  });
+  html += '</table></div>';
+
+  // Parimatriisi (kohtaamiskerrat purjehdittujen kisojen perusteella)
+  html += '<h3 style="color:var(--accent);margin:20px 0 12px">Vastakkainasettelut (kohtaamiskerrat)</h3>';
+  html += '<div style="overflow-x:auto"><table>';
+  html += '<tr><th></th>';
+  SAILORS.forEach(s => html += `<th>${s}</th>`);
+  html += '</tr>';
+
+  SAILORS.forEach(s1 => {
+    html += `<tr><td class="name-col">${s1}</td>`;
+    SAILORS.forEach(s2 => {
+      if (s1 === s2) {
+        html += '<td>—</td>';
+      } else {
+        let count = 0;
+        for (let r = 0; r < NUM_RACES; r++) {
+          const sailors = Object.values(SCHEDULE[r]);
+          if (sailors.includes(s1) && sailors.includes(s2)) count++;
+        }
+        html += `<td>${count}</td>`;
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</table></div>';
+
+  el.innerHTML = html;
+}
+
+// Alusta
+renderAll();
+</script>
+</body>
+</html>

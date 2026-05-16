@@ -1,0 +1,13 @@
+{
+  "name": "purjehdus",
+  "version": "1.0.0",
+  "description": "Purjehduskilpailun hallinta — 10 purjehtijaa, 4 venettä, 20 kisaa",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.7.0",
+    "express": "^4.21.0"
+  }
+}
