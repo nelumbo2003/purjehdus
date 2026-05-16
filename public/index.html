@@ -107,12 +107,14 @@ th.sticky-col{z-index:3;background:var(--card)}
   <div id="p-tulos" class="panel"></div>
   <div id="p-syotto" class="panel"></div>
   <div id="p-aika" class="panel"></div>
+  <div id="p-stats" class="panel"></div>
   <div id="p-asetus" class="panel"></div>
 </div>
 <nav class="nav" id="main-nav" style="display:none">
   <button class="active" data-p="p-tulos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Tulokset</button>
   <button data-p="p-syotto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Syötä</button>
   <button data-p="p-aika"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Aikataulu</button>
+  <button data-p="p-stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Tilastot</button>
   <button data-p="p-asetus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Asetukset</button>
 </nav>
 <div class="toast" id="toast"></div>
@@ -255,8 +257,8 @@ function fleetBadgeClass(f){return{bronze:'fb-bronze',silver:'fb-silver',gold:'f
 function render(){
   if(!comp)return;
   updateHeader();
-  if(mode==='qual'){renderQualTulos();renderQualSyotto();renderQualAika();renderAsetus()}
-  else{renderFinalsTulos();renderFinalsSyotto();renderFinalsAika();renderAsetus()}
+  if(mode==='qual'){renderQualTulos();renderQualSyotto();renderQualAika();renderStats();renderAsetus()}
+  else{renderFinalsTulos();renderFinalsSyotto();renderFinalsAika();renderStats();renderAsetus()}
 }
 
 function updateHeader(){
@@ -549,6 +551,122 @@ function renderFinalsAika(){
     }
     h+='</table></div></div>';
   });
+  el.innerHTML=h;
+}
+
+// ===== STATS =====
+function renderStats(){
+  const el=document.getElementById('p-stats');if(activeTab!=='p-stats')return;
+  if(!comp){el.innerHTML='';return}
+
+  // Collect boat stats from qualifying results
+  const boatPos={}, boatSailor={};
+  comp.boats.forEach(b=>{boatPos[b.boat_key]=[];boatSailor[b.boat_key]={}});
+
+  Object.entries(comp.results).forEach(([ri,res])=>{
+    const race=comp.schedule[parseInt(ri)];if(!race)return;
+    comp.boats.forEach(b=>{
+      const sid=race[b.boat_key];
+      if(sid&&res[sid]!==undefined){
+        const p=res[sid];
+        boatPos[b.boat_key].push(p);
+        if(!boatSailor[b.boat_key][sid])boatSailor[b.boat_key][sid]=[];
+        boatSailor[b.boat_key][sid].push(p);
+      }
+    });
+  });
+
+  // Sort boats by avg position
+  const bStats=comp.boats.map(b=>{
+    const pos=boatPos[b.boat_key];
+    const avg=pos.length?pos.reduce((a,v)=>a+v,0)/pos.length:99;
+    const wins=pos.filter(p=>p===1).length;
+    const top2=pos.filter(p=>p<=2).length;
+    const lasts=pos.filter(p=>p===comp.num_boats).length;
+    return{...b,pos,avg,wins,top2,lasts};
+  }).sort((a,b)=>a.avg-b.avg);
+
+  let h='';
+  const qd=qualRacesDone();
+  if(qd===0){el.innerHTML='<p style="color:var(--muted);text-align:center;padding:40px">Ei vielä tuloksia.</p>';return}
+
+  // === BOAT RATING ===
+  h+='<div class="fleet-card"><div class="fleet-title">Veneiden rating</div>';
+  h+='<div class="tbl-wrap"><table><tr><th class="sticky-col">#</th><th>Vene</th><th>Kisoja</th><th>Keskim.</th><th style="color:var(--gold)">1. sija</th><th>Top-2</th><th style="color:var(--red)">Viim.</th></tr>';
+  bStats.forEach((b,i)=>{
+    if(!b.pos.length)return;
+    const avgColor=b.avg<=2.4?'var(--green)':b.avg<=2.6?'var(--gold)':'var(--red)';
+    h+=`<tr><td class="sticky-col" style="font-weight:700">${i+1}</td><td class="nc">${esc(b.name)}</td><td>${b.pos.length}</td><td style="color:${avgColor};font-weight:700">${b.avg.toFixed(2)}</td><td>${b.wins}</td><td>${b.top2}</td><td>${b.lasts}</td></tr>`;
+  });
+  h+='</table></div>';
+
+  // Position distribution bars
+  h+='<div style="margin-top:12px">';
+  bStats.forEach(b=>{
+    if(!b.pos.length)return;
+    const dist={};for(let p=1;p<=comp.num_boats;p++)dist[p]=b.pos.filter(x=>x===p).length;
+    const total=b.pos.length;
+    h+=`<div style="margin-bottom:8px"><div style="font-size:.75rem;color:var(--muted);margin-bottom:3px">${esc(b.name)}</div>`;
+    h+='<div style="display:flex;height:20px;border-radius:4px;overflow:hidden">';
+    const colors={1:'var(--gold)',2:'var(--silver)',3:'var(--bronze)',4:'var(--red)'};
+    for(let p=1;p<=comp.num_boats;p++){
+      const pct=(dist[p]/total*100);
+      if(pct>0)h+=`<div style="width:${pct}%;background:${colors[p]||'var(--muted)'};display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:${p<=2?'#000':'#fff'}">${dist[p]}</div>`;
+    }
+    h+='</div></div>';
+  });
+  h+='</div></div>';
+
+  // === SAILOR × BOAT MATRIX ===
+  h+='<div class="fleet-card"><div class="fleet-title">Purjehtija × Vene (keskisijoitus)</div>';
+  h+='<div class="tbl-wrap"><table><tr><th class="sticky-col">Nimi</th>';
+  bStats.forEach(b=>h+=`<th>${esc(b.name)}</th>`);
+  h+='<th>Keskim.</th></tr>';
+
+  // Sort sailors by overall avg
+  const sailorAvgs=comp.sailors.map(s=>{
+    let all=[];
+    bStats.forEach(b=>{const p=boatSailor[b.boat_key][s.sailor_key];if(p)all.push(...p)});
+    return{...s,avg:all.length?all.reduce((a,v)=>a+v,0)/all.length:99,races:all.length};
+  }).sort((a,b)=>a.avg-b.avg);
+
+  sailorAvgs.forEach(s=>{
+    if(!s.races)return;
+    h+=`<tr><td class="sticky-col nc">${esc(s.name)}</td>`;
+    bStats.forEach(b=>{
+      const positions=boatSailor[b.boat_key][s.sailor_key];
+      if(positions&&positions.length){
+        const avg=positions.reduce((a,v)=>a+v,0)/positions.length;
+        const c=avg<=1.5?'var(--green)':avg<=2.5?'var(--gold)':avg>=3.5?'var(--red)':'var(--text)';
+        h+=`<td style="color:${c};font-weight:600">${avg.toFixed(1)}</td>`;
+      }else h+='<td class="dns">—</td>';
+    });
+    const c=s.avg<=2?'var(--green)':s.avg<=2.5?'var(--gold)':'var(--text)';
+    h+=`<td style="color:${c};font-weight:700">${s.avg.toFixed(2)}</td></tr>`;
+  });
+  h+='</table></div></div>';
+
+  // === SAILOR POSITION DISTRIBUTION ===
+  h+='<div class="fleet-card"><div class="fleet-title">Sijoitusjakauma</div>';
+  h+='<div class="tbl-wrap"><table><tr><th class="sticky-col">Nimi</th>';
+  for(let p=1;p<=comp.num_boats;p++){
+    const c={1:'var(--gold)',2:'var(--silver)',3:'var(--bronze)',4:'var(--red)'}[p]||'var(--text)';
+    h+=`<th style="color:${c}">${p}. sija</th>`;
+  }
+  h+='<th>Keskim.</th></tr>';
+
+  sailorAvgs.forEach(s=>{
+    if(!s.races)return;
+    let all=[];
+    bStats.forEach(b=>{const p=boatSailor[b.boat_key][s.sailor_key];if(p)all.push(...p)});
+    const dist={};for(let p=1;p<=comp.num_boats;p++)dist[p]=all.filter(x=>x===p).length;
+    h+=`<tr><td class="sticky-col nc">${esc(s.name)}</td>`;
+    for(let p=1;p<=comp.num_boats;p++)h+=`<td>${dist[p]||0}</td>`;
+    const c=s.avg<=2?'var(--green)':s.avg<=2.5?'var(--gold)':'var(--text)';
+    h+=`<td style="color:${c};font-weight:700">${s.avg.toFixed(2)}</td></tr>`;
+  });
+  h+='</table></div></div>';
+
   el.innerHTML=h;
 }
 
