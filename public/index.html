@@ -7,541 +7,582 @@
 <meta name="theme-color" content="#0a1628">
 <title>Purjehduskilpailu</title>
 <style>
-:root {
-  --bg: #0a1628;
-  --card: #111d33;
-  --border: #1e3150;
-  --text: #e0e8f0;
-  --muted: #7a8da6;
-  --accent: #3b82f6;
-  --gold: #fbbf24;
-  --silver: #94a3b8;
-  --bronze: #d97706;
-  --green: #22c55e;
-  --red: #ef4444;
-  --safe-b: env(safe-area-inset-bottom, 0px);
-}
+:root{--bg:#0a1628;--card:#111d33;--border:#1e3150;--text:#e0e8f0;--muted:#7a8da6;--accent:#3b82f6;--gold:#fbbf24;--silver:#94a3b8;--bronze:#d97706;--green:#22c55e;--red:#ef4444;--safe-b:env(safe-area-inset-bottom,0px)}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden}
-body{
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-  background:var(--bg);color:var(--text);
-  display:flex;flex-direction:column;
-  -webkit-tap-highlight-color:transparent;
-}
-
-/* === HEADER === */
-.header{
-  background:var(--card);border-bottom:1px solid var(--border);
-  padding:12px 16px;text-align:center;flex-shrink:0;
-}
-.header h1{font-size:1.1rem;color:var(--accent);margin-bottom:2px}
-.header .sub{font-size:.75rem;color:var(--muted)}
-.leader-bar{
-  display:flex;justify-content:center;gap:16px;
-  margin-top:6px;font-size:.8rem;color:var(--muted);
-}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;-webkit-tap-highlight-color:transparent}
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:10px 16px;text-align:center;flex-shrink:0}
+.header h1{font-size:1rem;color:var(--accent);margin-bottom:2px;cursor:pointer}
+.header .sub{font-size:.72rem;color:var(--muted)}
+.leader-bar{display:flex;justify-content:center;gap:16px;margin-top:4px;font-size:.78rem;color:var(--muted)}
 .leader-bar span{color:var(--text);font-weight:600}
-
-/* === MAIN SCROLL === */
+.mode-toggle{display:flex;justify-content:center;gap:4px;margin-top:6px}
+.mode-btn{padding:6px 16px;border:1px solid var(--border);border-radius:20px;background:none;color:var(--muted);font-family:inherit;font-size:.75rem;cursor:pointer}
+.mode-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
 .panel{display:none;padding:12px}
 .panel.active{display:block}
-
-/* === BOTTOM NAV === */
-.nav{
-  display:flex;background:var(--card);border-top:1px solid var(--border);
-  flex-shrink:0;padding-bottom:var(--safe-b);
-}
-.nav button{
-  flex:1;padding:10px 4px 8px;background:none;border:none;
-  color:var(--muted);font-size:.65rem;font-family:inherit;
-  display:flex;flex-direction:column;align-items:center;gap:2px;
-  cursor:pointer;transition:color .15s;min-height:54px;
-}
+.nav{display:flex;background:var(--card);border-top:1px solid var(--border);flex-shrink:0;padding-bottom:var(--safe-b)}
+.nav button{flex:1;padding:8px 4px 6px;background:none;border:none;color:var(--muted);font-size:.62rem;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;min-height:50px}
 .nav button.active{color:var(--accent)}
-.nav button svg{width:22px;height:22px}
-
-/* === TABLES === */
+.nav button svg{width:20px;height:20px}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -12px;padding:0 12px}
-table{width:100%;border-collapse:collapse;font-size:.78rem}
-th,td{padding:7px 6px;border:1px solid var(--border);text-align:center;white-space:nowrap}
+table{width:100%;border-collapse:collapse;font-size:.75rem}
+th,td{padding:6px 5px;border:1px solid var(--border);text-align:center;white-space:nowrap}
 th{background:var(--card);color:var(--muted);font-weight:600;position:sticky;top:0;z-index:2}
 td{background:var(--bg)}
 .sticky-col{position:sticky;left:0;z-index:1;background:var(--bg)}
 th.sticky-col{z-index:3;background:var(--card)}
-
-/* === RESULTS INPUT === */
-.input-card{
-  background:var(--card);border:1px solid var(--border);border-radius:10px;
-  padding:16px;margin-bottom:12px;
-}
-.input-card h3{color:var(--accent);font-size:.95rem;margin-bottom:12px}
-.race-sel{margin-bottom:16px}
-.race-sel select{
-  width:100%;padding:12px;font-size:1rem;border-radius:8px;
-  background:var(--bg);color:var(--text);border:1px solid var(--border);
-  font-family:inherit;
-}
-.boat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.boat-cell{
-  background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;
-}
-.boat-cell .boat-name{font-size:.75rem;color:var(--muted);margin-bottom:4px}
-.boat-cell .sailor-name{font-size:1rem;font-weight:700;color:var(--accent);margin-bottom:10px}
-.pos-row{display:flex;gap:6px}
-.pos-btn{
-  flex:1;height:48px;border-radius:8px;border:2px solid transparent;
-  font-weight:700;font-size:1.1rem;font-family:inherit;cursor:pointer;
-  transition:all .12s;
-}
+.input-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px}
+.input-card h3{color:var(--accent);font-size:.9rem;margin-bottom:10px}
+.race-sel select{width:100%;padding:10px;font-size:.95rem;border-radius:8px;background:var(--bg);color:var(--text);border:1px solid var(--border);font-family:inherit;margin-bottom:12px}
+.boat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.boat-cell{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px}
+.boat-cell .bn{font-size:.7rem;color:var(--muted);margin-bottom:2px}
+.boat-cell .sn{font-size:.95rem;font-weight:700;color:var(--accent);margin-bottom:8px}
+.pos-row{display:flex;gap:5px}
+.pos-btn{flex:1;height:44px;border-radius:8px;border:2px solid transparent;font-weight:700;font-size:1rem;font-family:inherit;cursor:pointer}
 .pos-btn:active{transform:scale(.92)}
 .pos-btn.sel{border-color:#fff;box-shadow:0 0 8px rgba(255,255,255,.3)}
-.p1{background:var(--gold);color:#000}
-.p2{background:var(--silver);color:#000}
-.p3{background:var(--bronze);color:#fff}
-.p4{background:var(--red);color:#fff}
+.p1{background:var(--gold);color:#000}.p2{background:var(--silver);color:#000}.p3{background:var(--bronze);color:#fff}.p4{background:var(--red);color:#fff}
 .btn-row{display:flex;gap:8px}
-.btn-save{
-  flex:1;padding:14px;border:none;border-radius:10px;
-  background:var(--accent);color:#fff;font-weight:700;
-  font-size:1rem;font-family:inherit;cursor:pointer;
-}
-.btn-save:active{background:#2563eb}
-.btn-save:disabled{opacity:.4}
-.btn-clear{
-  padding:14px 20px;border:none;border-radius:10px;
-  background:var(--red);color:#fff;font-weight:700;
-  font-size:1rem;font-family:inherit;cursor:pointer;
-}
+.btn-save{flex:1;padding:12px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;font-size:.95rem;font-family:inherit;cursor:pointer}
+.btn-save:active{background:#2563eb}.btn-save:disabled{opacity:.4}
+.btn-clear{padding:12px 18px;border:none;border-radius:10px;background:var(--red);color:#fff;font-weight:700;font-size:.95rem;font-family:inherit;cursor:pointer}
 .btn-clear:active{background:#dc2626}
-
-/* === SETTINGS (names) === */
-.name-row{
-  display:flex;align-items:center;gap:10px;
-  margin-bottom:10px;
-}
-.name-row label{
-  width:28px;font-weight:700;color:var(--accent);font-size:1rem;flex-shrink:0;
-}
-.name-row input{
-  flex:1;padding:12px;border-radius:8px;
-  background:var(--bg);color:var(--text);border:1px solid var(--border);
-  font-size:1rem;font-family:inherit;
-}
+.btn-gen{padding:12px;border:none;border-radius:10px;background:var(--green);color:#000;font-weight:700;font-size:.95rem;font-family:inherit;cursor:pointer;width:100%;margin-bottom:12px}
+.btn-gen:disabled{opacity:.4;cursor:not-allowed}
+.name-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.name-row label{width:24px;font-weight:700;color:var(--accent);font-size:.9rem;flex-shrink:0}
+.name-row input{flex:1;padding:10px;border-radius:8px;background:var(--bg);color:var(--text);border:1px solid var(--border);font-size:.95rem;font-family:inherit}
 .name-row input:focus{outline:2px solid var(--accent)}
-.section-title{
-  color:var(--accent);font-size:.95rem;font-weight:700;
-  margin:20px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--border);
-}
-.section-title:first-child{margin-top:0}
-
-/* Ranking colors */
-.r1 .name-col{color:var(--gold)}
-.r2 .name-col{color:var(--silver)}
-.r3 .name-col{color:var(--bronze)}
-.name-col{text-align:left;font-weight:700}
-.pts{font-weight:700;color:var(--green);font-size:.9rem}
+.sec-title{color:var(--accent);font-size:.9rem;font-weight:700;margin:16px 0 10px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.sec-title:first-child{margin-top:0}
+.r1 .nc{color:var(--gold)}.r2 .nc{color:var(--silver)}.r3 .nc{color:var(--bronze)}
+.nc{text-align:left;font-weight:700}.pts{font-weight:700;color:var(--green);font-size:.85rem}
 .dns{color:var(--border)}
-
-/* Schedule cells */
 .cell-sail{background:#1e3a5f;color:var(--accent);font-weight:600}
 .cell-done{background:#14532d;color:var(--green);font-weight:600}
 .cell-rest{color:#1e3150}
 .hdr-done{background:#14532d!important;color:var(--green)!important}
-
-/* Toast */
-.toast{
-  position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(60px);
-  background:var(--green);color:#000;padding:12px 24px;border-radius:10px;
-  font-weight:700;font-size:.9rem;opacity:0;transition:all .3s;z-index:200;
-  pointer-events:none;white-space:nowrap;
-}
+.fleet-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px}
+.fleet-title{font-weight:700;font-size:.95rem;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.fleet-badge{padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
+.fb-bronze{background:var(--bronze);color:#fff}
+.fb-silver{background:var(--silver);color:#000}
+.fb-gold{background:var(--gold);color:#000}
+.advance-badge{background:var(--green);color:#000;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
+.comp-list{list-style:none}
+.comp-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.comp-item:active{background:var(--border)}
+.comp-item .ci-name{font-weight:700;font-size:.95rem}
+.comp-item .ci-date{color:var(--muted);font-size:.8rem}
+.comp-item .ci-del{color:var(--red);font-size:.8rem;padding:4px 8px;border:1px solid var(--red);border-radius:6px;background:none;font-family:inherit;cursor:pointer}
+.new-comp{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px}
+.new-comp h3{color:var(--accent);font-size:.9rem;margin-bottom:10px}
+.form-row{margin-bottom:8px}
+.form-row label{display:block;color:var(--muted);font-size:.75rem;margin-bottom:3px}
+.form-row input,.form-row select{width:100%;padding:10px;border-radius:8px;background:var(--bg);color:var(--text);border:1px solid var(--border);font-size:.95rem;font-family:inherit}
+.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--green);color:#000;padding:10px 20px;border-radius:10px;font-weight:700;font-size:.85rem;opacity:0;transition:all .3s;z-index:200;pointer-events:none;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
-
-@media(min-width:640px){
-  .boat-grid{grid-template-columns:repeat(4,1fr)}
-  .panel{padding:16px 24px}
-}
+.overall-rank{font-size:1.1rem;font-weight:700;min-width:28px;text-align:center}
+@media(min-width:640px){.boat-grid{grid-template-columns:repeat(4,1fr)}.panel{padding:16px 24px}}
 </style>
 </head>
 <body>
-
 <div class="header">
-  <h1>Purjehduskilpailu</h1>
-  <div class="sub">10 purjehtijaa · 4 venettä · 20 kisaa</div>
+  <h1 id="hd-title" onclick="showCompList()">Purjehduskilpailu</h1>
+  <div class="sub" id="hd-sub"></div>
   <div class="leader-bar">
-    <div>Kisoja: <span id="hd-done">0</span>/20</div>
+    <div>Kisoja: <span id="hd-done">0</span></div>
     <div>Johto: <span id="hd-leader">—</span></div>
   </div>
+  <div class="mode-toggle" id="mode-toggle" style="display:none">
+    <button class="mode-btn active" onclick="setMode('qual')">Alkusarja</button>
+    <button class="mode-btn" onclick="setMode('finals')">Finaali</button>
+  </div>
 </div>
-
 <div class="main">
-  <div id="p-tulos" class="panel active"></div>
+  <div id="p-complist" class="panel active"></div>
+  <div id="p-tulos" class="panel"></div>
   <div id="p-syotto" class="panel"></div>
   <div id="p-aika" class="panel"></div>
-  <div id="p-paiva" class="panel"></div>
   <div id="p-asetus" class="panel"></div>
 </div>
-
-<nav class="nav">
-  <button class="active" data-p="p-tulos">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-    Tulokset
-  </button>
-  <button data-p="p-syotto">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-    Syötä
-  </button>
-  <button data-p="p-aika">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-    Aikataulu
-  </button>
-  <button data-p="p-paiva">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
-    Päivä
-  </button>
-  <button data-p="p-asetus">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-    Asetukset
-  </button>
+<nav class="nav" id="main-nav" style="display:none">
+  <button class="active" data-p="p-tulos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Tulokset</button>
+  <button data-p="p-syotto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Syötä</button>
+  <button data-p="p-aika"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Aikataulu</button>
+  <button data-p="p-asetus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Asetukset</button>
 </nav>
-
 <div class="toast" id="toast"></div>
 
 <script>
-/* ===== STATE ===== */
-let sailors = [];   // [{id,name}]
-let boats = [];     // [{id,name}]
-let schedule = [];  // [{1:'G',2:'J',...}]
-let results = {};   // {0:{A:1,E:2,...}}
+let competitions=[], comp=null, mode='qual', curRace=-1, curFleet='bronze', activeTab='p-tulos';
 
-const SAILOR_IDS = ['A','B','C','D','E','F','G','H','I','J'];
+async function api(url,opts){const r=await fetch(url,opts);return r.json()}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
 
-/* ===== API ===== */
-async function api(url, opts) {
-  const r = await fetch(url, opts);
-  return r.json();
-}
-async function loadAll() {
-  [sailors, boats, schedule, results] = await Promise.all([
-    api('/api/sailors'),
-    api('/api/boats'),
-    api('/api/schedule'),
-    api('/api/results'),
-  ]);
-  renderAll();
-}
+// Names
+function sName(key){if(!comp)return key;const s=comp.sailors.find(x=>x.sailor_key===key);return s?s.name:key}
+function bName(key){if(!comp)return key;const b=comp.boats.find(x=>x.boat_key===parseInt(key));return b?b.name:`Vene ${key}`}
 
-function sName(id) {
-  const s = sailors.find(s => s.id === id);
-  return s ? s.name : id;
-}
-function bName(id) {
-  const b = boats.find(b => b.id === parseInt(id));
-  return b ? b.name : `Vene ${id}`;
-}
-
-/* ===== NAV ===== */
-document.querySelectorAll('.nav button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
+// Nav
+document.querySelectorAll('.nav button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');activeTab=btn.dataset.p;
     document.getElementById(btn.dataset.p).classList.add('active');
-    renderAll();
+    render();
   });
 });
 
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+function showTab(id){
+  document.querySelectorAll('.nav button').forEach(b=>{b.classList.remove('active');if(b.dataset.p===id)b.classList.add('active')});
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');activeTab=id;render();
 }
 
-/* ===== STANDINGS ===== */
-function getStandings() {
-  const pts = {}, rc = {}, rp = {};
-  SAILOR_IDS.forEach(s => { pts[s]=0; rc[s]=0; rp[s]=[]; });
+function setMode(m){mode=m;document.querySelectorAll('.mode-btn').forEach((b,i)=>{b.classList.toggle('active',(m==='qual'&&i===0)||(m==='finals'&&i===1))});render()}
 
-  for (let r = 0; r < 20; r++) {
-    if (!results[r]) continue;
-    const race = schedule[r];
-    Object.entries(race).forEach(([boat, sid]) => {
-      if (results[r] && results[r][sid] !== undefined) {
-        pts[sid] += results[r][sid];
-        rc[sid]++;
-        rp[sid].push({race:r, pos:results[r][sid]});
+// ===== COMPETITION LIST =====
+async function loadCompetitions(){
+  competitions=await api('/api/competitions');
+  renderCompList();
+}
+
+function showCompList(){
+  comp=null;
+  document.getElementById('main-nav').style.display='none';
+  document.getElementById('mode-toggle').style.display='none';
+  document.getElementById('hd-title').textContent='Purjehduskilpailu';
+  document.getElementById('hd-sub').textContent='';
+  document.getElementById('hd-done').textContent='0';
+  document.getElementById('hd-leader').textContent='—';
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('p-complist').classList.add('active');
+  loadCompetitions();
+}
+
+function renderCompList(){
+  const el=document.getElementById('p-complist');
+  let h='<div class="new-comp"><h3>Uusi kilpailu</h3>';
+  h+='<div class="form-row"><label>Nimi</label><input id="nc-name" placeholder="Esim. Astree Hyppeis Challenge"></div>';
+  h+='<div class="form-row"><label>Päivämäärä</label><input id="nc-date" type="date"></div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  h+='<div class="form-row"><label>Purjehtijat</label><select id="nc-sailors">';
+  for(let i=4;i<=12;i++)h+=`<option value="${i}" ${i===10?'selected':''}>${i}</option>`;
+  h+='</select></div>';
+  h+='<div class="form-row"><label>Veneet</label><select id="nc-boats">';
+  for(let i=2;i<=4;i++)h+=`<option value="${i}" ${i===4?'selected':''}>${i}</option>`;
+  h+='</select></div></div>';
+  h+='<div class="form-row"><label>Kisoja alkusarjassa</label><input id="nc-races" type="number" value="20" min="4" max="40"></div>';
+  h+=`<button class="btn-save" style="width:100%;margin-top:8px" onclick="createComp()">Luo kilpailu</button></div>`;
+
+  if(competitions.length){
+    h+='<div class="sec-title">Kilpailut</div><ul class="comp-list">';
+    competitions.forEach(c=>{
+      h+=`<li class="comp-item" onclick="loadComp(${c.id})"><div><div class="ci-name">${esc(c.name)}</div><div class="ci-date">${c.date} · ${c.num_sailors} purjehtijaa · ${c.num_boats} venettä</div></div><button class="ci-del" onclick="event.stopPropagation();delComp(${c.id})">Poista</button></li>`;
+    });
+    h+='</ul>';
+  }
+  el.innerHTML=h;
+}
+
+async function createComp(){
+  const name=document.getElementById('nc-name').value.trim();
+  const date=document.getElementById('nc-date').value;
+  const ns=parseInt(document.getElementById('nc-sailors').value);
+  const nb=parseInt(document.getElementById('nc-boats').value);
+  const nr=parseInt(document.getElementById('nc-races').value)||20;
+  if(!name){toast('Anna kilpailun nimi');return}
+  if(!date){toast('Anna päivämäärä');return}
+  const r=await api('/api/competitions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,date,num_sailors:ns,num_boats:nb,num_races:nr})});
+  if(r.id){toast('Kilpailu luotu!');loadComp(r.id)}
+}
+
+async function delComp(id){
+  if(!confirm('Poistetaanko kilpailu?'))return;
+  await api(`/api/competitions/${id}`,{method:'DELETE'});
+  toast('Poistettu');loadCompetitions();
+}
+
+async function loadComp(id){
+  comp=await api(`/api/competitions/${id}`);
+  document.getElementById('main-nav').style.display='flex';
+  document.getElementById('mode-toggle').style.display='flex';
+  document.getElementById('hd-title').textContent=comp.name;
+  document.getElementById('hd-sub').textContent=`${comp.date} · ${comp.num_sailors} purjehtijaa · ${comp.num_boats} venettä`;
+  document.getElementById('p-complist').classList.remove('active');
+  mode='qual';curRace=-1;
+  document.querySelectorAll('.mode-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  showTab('p-tulos');
+}
+
+// ===== STANDINGS =====
+function calcStandings(sailorKeys,results,schedule){
+  const pts={},rc={},pd={};
+  sailorKeys.forEach(s=>{pts[s]=0;rc[s]=0;pd[s]={}});
+  Object.entries(results).forEach(([ri,res])=>{
+    Object.entries(res).forEach(([s,p])=>{
+      if(pts[s]!==undefined){pts[s]+=p;rc[s]++;pd[s][p]=(pd[s][p]||0)+1}
+    });
+  });
+  return sailorKeys.map(s=>({key:s,name:sName(s),pts:pts[s],races:rc[s],pd:pd[s]||{}}))
+    .sort((a,b)=>{
+      if(!a.races&&!b.races)return a.key.localeCompare(b.key);
+      if(!a.races)return 1;if(!b.races)return -1;
+      if(a.pts!==b.pts)return a.pts-b.pts;
+      for(let p=1;p<=10;p++){const ac=a.pd[p]||0,bc=b.pd[p]||0;if(ac!==bc)return bc-ac}
+      return a.key.localeCompare(b.key);
+    });
+}
+
+function qualRacesDone(){if(!comp)return 0;return Object.keys(comp.results).filter(ri=>Object.keys(comp.results[ri]).length>=comp.num_boats).length}
+function fleetRacesDone(fleet){if(!comp||!comp.finalsResults||!comp.finalsResults[fleet])return 0;return Object.keys(comp.finalsResults[fleet]).filter(ri=>Object.keys(comp.finalsResults[fleet][ri]).length>=comp.num_boats).length}
+
+function getFleetNames(){
+  if(!comp)return[];
+  const n=Math.ceil(comp.num_sailors/comp.num_boats);
+  return['bronze','silver','gold','platinum','diamond'].slice(0,n);
+}
+function fleetLabel(f){return{bronze:'Pronssi',silver:'Hopea',gold:'Kulta',platinum:'Platina',diamond:'Timantti'}[f]||f}
+function fleetBadgeClass(f){return{bronze:'fb-bronze',silver:'fb-silver',gold:'fb-gold'}[f]||'fb-bronze'}
+
+// ===== RENDER =====
+function render(){
+  if(!comp)return;
+  updateHeader();
+  if(mode==='qual'){renderQualTulos();renderQualSyotto();renderQualAika();renderAsetus()}
+  else{renderFinalsTulos();renderFinalsSyotto();renderFinalsAika();renderAsetus()}
+}
+
+function updateHeader(){
+  const qd=qualRacesDone();
+  if(mode==='qual'){
+    document.getElementById('hd-done').textContent=`${qd}/${comp.num_races}`;
+    const sk=comp.sailors.map(s=>s.sailor_key);
+    const st=calcStandings(sk,comp.results,comp.schedule);
+    const ld=st.find(s=>s.races>0);
+    document.getElementById('hd-leader').textContent=ld?`${ld.name} (${ld.pts}p)`:'—';
+  } else {
+    const fns=getFleetNames();
+    let done=0,total=fns.length*comp.num_boats;
+    fns.forEach(f=>done+=fleetRacesDone(f));
+    document.getElementById('hd-done').textContent=`Finaali ${done}/${total}`;
+    document.getElementById('hd-leader').textContent='';
+  }
+}
+
+// ===== QUALIFYING PANELS =====
+function renderQualTulos(){
+  const el=document.getElementById('p-tulos');if(activeTab!=='p-tulos')return;
+  const sk=comp.sailors.map(s=>s.sailor_key);
+  const st=calcStandings(sk,comp.results,comp.schedule);
+  let h='<div class="tbl-wrap"><table><tr><th class="sticky-col">#</th><th>Nimi</th><th>Pist.</th>';
+  for(let r=0;r<comp.num_races;r++){
+    const d=comp.results[r]&&Object.keys(comp.results[r]).length>=comp.num_boats;
+    h+=`<th class="${d?'hdr-done':''}">${r+1}</th>`;
+  }
+  h+='</tr>';
+  st.forEach((s,i)=>{
+    const rank=s.races>0?i+1:'—';
+    const rc=rank<=3&&s.races>0?` r${rank}`:'';
+    h+=`<tr class="${rc}"><td class="sticky-col">${rank}</td><td class="nc">${esc(s.name)}</td><td class="pts">${s.races>0?s.pts:'—'}</td>`;
+    for(let r=0;r<comp.num_races;r++){
+      const race=comp.schedule[r];if(!race){h+='<td>—</td>';continue}
+      const inRace=Object.values(race).includes(s.key);
+      if(!inRace){h+='<td class="dns">·</td>'}
+      else if(comp.results[r]&&comp.results[r][s.key]!==undefined){
+        const p=comp.results[r][s.key];
+        const c={1:'var(--gold)',2:'var(--silver)',3:'var(--bronze)',4:'var(--red)'}[p]||'var(--text)';
+        h+=`<td style="color:${c};font-weight:700">${p}</td>`;
+      }else h+='<td>—</td>';
+    }
+    h+='</tr>';
+  });
+  h+='</table></div>';
+  el.innerHTML=h;
+}
+
+function renderQualSyotto(){
+  const el=document.getElementById('p-syotto');if(activeTab!=='p-syotto')return;
+  if(curRace<0){for(let r=0;r<comp.num_races;r++){if(!comp.results[r]||Object.keys(comp.results[r]).length<comp.num_boats){curRace=r;break}}if(curRace<0)curRace=0}
+  let h='<div class="input-card"><h3>Syötä kisatulokset</h3><div class="race-sel"><select id="rsel" onchange="curRace=+this.value;render()">';
+  for(let r=0;r<comp.num_races;r++){
+    const d=comp.results[r]&&Object.keys(comp.results[r]).length>=comp.num_boats;
+    h+=`<option value="${r}" ${r===curRace?'selected':''}>Kisa ${r+1}${d?' ✓':''}</option>`;
+  }
+  h+='</select></div>';
+  const race=comp.schedule[curRace];
+  if(!race){h+='<p style="color:var(--muted)">Ei aikataulua</p></div>';el.innerHTML=h;return}
+  const ex=comp.results[curRace]||{};
+  h+='<div class="boat-grid">';
+  comp.boats.forEach(b=>{
+    const sid=race[b.boat_key];if(!sid)return;
+    const cp=ex[sid];
+    h+=`<div class="boat-cell"><div class="bn">${esc(b.name)}</div><div class="sn">${esc(sName(sid))}</div><div class="pos-row">`;
+    for(let p=1;p<=comp.num_boats;p++)h+=`<button class="pos-btn p${Math.min(p,4)}${cp===p?' sel':''}" onclick="setQualPos(${curRace},'${sid}',${p})">${p}</button>`;
+    h+='</div></div>';
+  });
+  h+=`</div><div class="btn-row"><button class="btn-save" onclick="saveQualRace(${curRace})">Tallenna kisa ${curRace+1}</button><button class="btn-clear" onclick="clearQualRace(${curRace})">Tyhjennä</button></div></div>`;
+  el.innerHTML=h;
+}
+
+function setQualPos(ri,sid,pos){
+  if(!comp.results[ri])comp.results[ri]={};
+  Object.keys(comp.results[ri]).forEach(s=>{if(comp.results[ri][s]===pos&&s!==sid)delete comp.results[ri][s]});
+  comp.results[ri][sid]=pos;render();
+}
+
+async function saveQualRace(ri){
+  const race=comp.schedule[ri];const r=comp.results[ri]||{};
+  const sailors=Object.values(race);
+  if(sailors.filter(s=>r[s]!==undefined).length<comp.num_boats){toast('Anna sijoitus kaikille!');return}
+  const pv=sailors.map(s=>r[s]).sort((a,b)=>a-b);
+  const exp=Array.from({length:comp.num_boats},(_,i)=>i+1);
+  if(JSON.stringify(pv)!==JSON.stringify(exp)){toast(`Sijoitusten pitää olla 1-${comp.num_boats}!`);return}
+  await api(`/api/competitions/${comp.id}/results/${ri}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(r)});
+  toast(`Kisa ${ri+1} tallennettu!`);comp=await api(`/api/competitions/${comp.id}`);render();
+}
+
+async function clearQualRace(ri){
+  delete comp.results[ri];
+  await api(`/api/competitions/${comp.id}/results/${ri}`,{method:'DELETE'});
+  toast(`Kisa ${ri+1} tyhjennetty`);render();
+}
+
+function renderQualAika(){
+  const el=document.getElementById('p-aika');if(activeTab!=='p-aika')return;
+  let h='<div class="tbl-wrap"><table><tr><th>Kisa</th>';
+  comp.boats.forEach(b=>h+=`<th>${esc(b.name)}</th>`);
+  h+='<th>Tauolla</th><th></th></tr>';
+  for(let r=0;r<comp.num_races;r++){
+    const race=comp.schedule[r];if(!race){continue}
+    const d=comp.results[r]&&Object.keys(comp.results[r]).length>=comp.num_boats;
+    const inR=Object.values(race);
+    const rest=comp.sailors.filter(s=>!inR.includes(s.sailor_key)).map(s=>s.name).join(', ');
+    h+=`<tr><td style="font-weight:700">${r+1}</td>`;
+    comp.boats.forEach(b=>h+=`<td>${esc(sName(race[b.boat_key]))}</td>`);
+    h+=`<td style="color:var(--muted);font-size:.7rem">${esc(rest)}</td><td>${d?'<span style="color:var(--green)">✓</span>':'—'}</td></tr>`;
+  }
+  h+='</table></div>';el.innerHTML=h;
+}
+
+// ===== FINALS PANELS =====
+function renderFinalsTulos(){
+  const el=document.getElementById('p-tulos');if(activeTab!=='p-tulos')return;
+  const fns=getFleetNames();
+  const qd=qualRacesDone();
+  if(qd<comp.num_races){el.innerHTML=`<p style="color:var(--muted);text-align:center;padding:40px">Alkusarja kesken (${qd}/${comp.num_races}). Vaihda alkusarjaan syöttämään tuloksia.</p>`;return}
+
+  let h='';
+  // Fleet standings
+  fns.forEach(f=>{
+    const sched=comp.finalsSchedule[f];
+    h+=`<div class="fleet-card"><div class="fleet-title"><span class="fleet-badge ${fleetBadgeClass(f)}">${fleetLabel(f)}</span>`;
+    if(!sched||!sched.length){h+=`<span style="color:var(--muted)">Aikataulu ei generoitu</span></div></div>`;return}
+    const sailors=[...new Set(sched.flatMap(r=>Object.values(r)))];
+    const results=comp.finalsResults[f]||{};
+    const st=calcStandings(sailors,results,sched);
+    const fd=fleetRacesDone(f);
+    h+=`${fd}/${comp.num_boats} kisaa</div>`;
+    h+='<div class="tbl-wrap"><table><tr><th>#</th><th>Nimi</th><th>Pist.</th>';
+    for(let r=0;r<comp.num_boats;r++){const d=results[r]&&Object.keys(results[r]).length>=comp.num_boats;h+=`<th class="${d?'hdr-done':''}">${r+1}</th>`}
+    h+='<th></th></tr>';
+    st.forEach((s,i)=>{
+      const rank=s.races>0?i+1:'—';
+      h+=`<tr><td>${rank}</td><td class="nc">${esc(s.name)}</td><td class="pts">${s.races>0?s.pts:'—'}</td>`;
+      for(let r=0;r<comp.num_boats;r++){
+        if(results[r]&&results[r][s.key]!==undefined){
+          const p=results[r][s.key];
+          const c={1:'var(--gold)',2:'var(--silver)',3:'var(--bronze)',4:'var(--red)'}[p]||'var(--text)';
+          h+=`<td style="color:${c};font-weight:700">${p}</td>`;
+        }else h+='<td>—</td>';
       }
+      // Advance badge
+      const isWinner=s.races>0&&i===0&&fd===comp.num_boats&&fns.indexOf(f)<fns.length-1;
+      h+=`<td>${isWinner?'<span class="advance-badge">↑ Jatkaa</span>':''}</td></tr>`;
+    });
+    h+='</table></div></div>';
+  });
+
+  // Overall standings
+  h+=renderOverallStandings();
+  el.innerHTML=h;
+}
+
+function renderOverallStandings(){
+  const fns=getFleetNames();
+  const topFleet=fns[fns.length-1];
+  if(!comp.finalsSchedule[topFleet]||!comp.finalsSchedule[topFleet].length)return'';
+  const topDone=fleetRacesDone(topFleet);
+  if(topDone<comp.num_boats)return'';
+
+  let h='<div class="fleet-card"><div class="fleet-title">Lopullinen sijoitus</div>';
+  h+='<div class="tbl-wrap"><table><tr><th>#</th><th>Nimi</th><th>Fleet</th><th>Pist.</th></tr>';
+
+  let rank=1;
+  for(let fi=fns.length-1;fi>=0;fi--){
+    const f=fns[fi];
+    const sched=comp.finalsSchedule[f];if(!sched||!sched.length)continue;
+    const sailors=[...new Set(sched.flatMap(r=>Object.values(r)))];
+    const results=comp.finalsResults[f]||{};
+    const st=calcStandings(sailors,results,sched);
+    const isTop=fi===fns.length-1;
+    st.forEach((s,i)=>{
+      if(!isTop&&i===0)return;
+      const rc=rank<=3?` r${rank}`:'';
+      h+=`<tr class="${rc}"><td class="overall-rank">${rank}</td><td class="nc">${esc(s.name)}</td><td><span class="fleet-badge ${fleetBadgeClass(f)}">${fleetLabel(f)}</span></td><td class="pts">${s.pts}</td></tr>`;
+      rank++;
     });
   }
+  h+='</table></div></div>';
+  return h;
+}
 
-  const st = SAILOR_IDS.map(s => ({id:s, name:sName(s), pts:pts[s], races:rc[s], rp:rp[s]}));
-  st.sort((a,b) => {
-    if (!a.races && !b.races) return a.id.localeCompare(b.id);
-    if (!a.races) return 1;
-    if (!b.races) return -1;
-    if (a.pts !== b.pts) return a.pts - b.pts;
-    const a1 = a.rp.filter(r=>r.pos===1).length;
-    const b1 = b.rp.filter(r=>r.pos===1).length;
-    if (a1 !== b1) return b1 - a1;
-    return a.id.localeCompare(b.id);
+function renderFinalsSyotto(){
+  const el=document.getElementById('p-syotto');if(activeTab!=='p-syotto')return;
+  const fns=getFleetNames();
+  const qd=qualRacesDone();
+  if(qd<comp.num_races){el.innerHTML=`<p style="color:var(--muted);text-align:center;padding:40px">Alkusarja kesken (${qd}/${comp.num_races}).</p>`;return}
+
+  let h='<div class="input-card"><h3>Finaali — Tulosten syöttö</h3>';
+
+  // Fleet selector
+  h+='<div class="race-sel"><select id="fsel" onchange="curFleet=this.value;render()">';
+  fns.forEach(f=>{
+    const sched=comp.finalsSchedule[f];
+    const hasSched=sched&&sched.length>0;
+    h+=`<option value="${f}" ${f===curFleet?'selected':''}>${fleetLabel(f)}${hasSched?' ✓':''}</option>`;
   });
-  return st;
-}
+  h+='</select></div>';
 
-function racesDone() {
-  let c = 0;
-  for (let r = 0; r < 20; r++) if (results[r] && Object.keys(results[r]).length === 4) c++;
-  return c;
-}
-
-/* ===== RENDER ===== */
-function renderAll() {
-  const done = racesDone();
-  document.getElementById('hd-done').textContent = done;
-  const st = getStandings();
-  const ld = st.find(s => s.races > 0);
-  document.getElementById('hd-leader').textContent = ld ? `${ld.name} (${ld.pts}p)` : '—';
-
-  renderTulos(st);
-  renderSyotto();
-  renderAika();
-  renderPaiva();
-  renderAsetus();
-}
-
-/* --- Tulostaulu --- */
-function renderTulos(st) {
-  const el = document.getElementById('p-tulos');
-  let h = '<div class="tbl-wrap"><table><tr><th class="sticky-col">#</th><th>Nimi</th><th>Pist.</th><th>Kisoja</th>';
-  for (let r = 0; r < 20; r++) {
-    const d = results[r] && Object.keys(results[r]).length === 4;
-    h += `<th class="${d?'hdr-done':''}">${r+1}</th>`;
+  const sched=comp.finalsSchedule[curFleet];
+  if(!sched||!sched.length){
+    // Generate button
+    const fleetIdx=fns.indexOf(curFleet);
+    let canGen=true,reason='';
+    if(fleetIdx===0){if(qd<comp.num_races){canGen=false;reason=`Alkusarja kesken (${qd}/${comp.num_races})`}}
+    else{const prevF=fns[fleetIdx-1];const pd=fleetRacesDone(prevF);if(pd<comp.num_boats){canGen=false;reason=`${fleetLabel(prevF)} kesken (${pd}/${comp.num_boats})`}}
+    h+=`<button class="btn-gen" ${canGen?'':`disabled title="${reason}"`} onclick="genFleet('${curFleet}')">Arvo ${fleetLabel(curFleet)}-sarjan aikataulu</button>`;
+    if(!canGen)h+=`<p style="color:var(--muted);font-size:.8rem;text-align:center">${reason}</p>`;
+    h+='</div>';el.innerHTML=h;return;
   }
-  h += '</tr>';
 
-  st.forEach((s, i) => {
-    const rank = s.races > 0 ? i+1 : '—';
-    const rc = rank <= 3 && s.races > 0 ? ` r${rank}` : '';
-    h += `<tr class="${rc}"><td class="sticky-col">${rank}</td>`;
-    h += `<td class="name-col">${s.name}</td>`;
-    h += `<td class="pts">${s.races > 0 ? s.pts : '—'}</td>`;
-    h += `<td>${s.races}</td>`;
+  // Race selector within fleet
+  const fr=comp.finalsResults[curFleet]||{};
+  if(curRace<0||curRace>=comp.num_boats)curRace=0;
+  h+='<div class="race-sel"><select id="frsel" onchange="curRace=+this.value;render()">';
+  for(let r=0;r<comp.num_boats;r++){
+    const d=fr[r]&&Object.keys(fr[r]).length>=comp.num_boats;
+    h+=`<option value="${r}" ${r===curRace?'selected':''}>${fleetLabel(curFleet)} kisa ${r+1}${d?' ✓':''}</option>`;
+  }
+  h+='</select></div>';
 
-    for (let r = 0; r < 20; r++) {
-      const race = schedule[r];
-      const inRace = Object.values(race).includes(s.id);
-      if (!inRace) {
-        h += '<td class="dns">·</td>';
-      } else if (results[r] && results[r][s.id] !== undefined) {
-        const p = results[r][s.id];
-        const c = {1:'var(--gold)',2:'var(--silver)',3:'var(--bronze)',4:'var(--red)'}[p];
-        h += `<td style="color:${c};font-weight:700">${p}</td>`;
-      } else {
-        h += '<td>—</td>';
-      }
+  const race=sched[curRace];if(!race){h+='</div>';el.innerHTML=h;return}
+  const ex=fr[curRace]||{};
+  h+='<div class="boat-grid">';
+  comp.boats.forEach(b=>{
+    const sid=race[b.boat_key];if(!sid)return;
+    const cp=ex[sid];
+    h+=`<div class="boat-cell"><div class="bn">${esc(b.name)}</div><div class="sn">${esc(sName(sid))}</div><div class="pos-row">`;
+    for(let p=1;p<=comp.num_boats;p++)h+=`<button class="pos-btn p${Math.min(p,4)}${cp===p?' sel':''}" onclick="setFinPos('${curFleet}',${curRace},'${sid}',${p})">${p}</button>`;
+    h+='</div></div>';
+  });
+  h+=`</div><div class="btn-row"><button class="btn-save" onclick="saveFinRace('${curFleet}',${curRace})">${fleetLabel(curFleet)} kisa ${curRace+1} — Tallenna</button><button class="btn-clear" onclick="clearFinRace('${curFleet}',${curRace})">Tyhjennä</button></div></div>`;
+  el.innerHTML=h;
+}
+
+async function genFleet(fleet){
+  const r=await api(`/api/competitions/${comp.id}/finals/generate/${fleet}`,{method:'POST',headers:{'Content-Type':'application/json'}});
+  if(r.error){toast(r.error);return}
+  toast(`${fleetLabel(fleet)} aikataulu arvottu!`);
+  comp=await api(`/api/competitions/${comp.id}`);curRace=0;render();
+}
+
+function setFinPos(fleet,ri,sid,pos){
+  if(!comp.finalsResults[fleet])comp.finalsResults[fleet]={};
+  if(!comp.finalsResults[fleet][ri])comp.finalsResults[fleet][ri]={};
+  const r=comp.finalsResults[fleet][ri];
+  Object.keys(r).forEach(s=>{if(r[s]===pos&&s!==sid)delete r[s]});
+  r[sid]=pos;render();
+}
+
+async function saveFinRace(fleet,ri){
+  const sched=comp.finalsSchedule[fleet];const race=sched[ri];
+  const r=comp.finalsResults[fleet]?.[ri]||{};
+  const sailors=Object.values(race);
+  if(sailors.filter(s=>r[s]!==undefined).length<comp.num_boats){toast('Anna sijoitus kaikille!');return}
+  const pv=sailors.map(s=>r[s]).sort((a,b)=>a-b);
+  const exp=Array.from({length:comp.num_boats},(_,i)=>i+1);
+  if(JSON.stringify(pv)!==JSON.stringify(exp)){toast(`Sijoitusten pitää olla 1-${comp.num_boats}!`);return}
+  await api(`/api/competitions/${comp.id}/finals/results/${fleet}/${ri}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(r)});
+  toast(`${fleetLabel(fleet)} kisa ${ri+1} tallennettu!`);comp=await api(`/api/competitions/${comp.id}`);render();
+}
+
+async function clearFinRace(fleet,ri){
+  if(comp.finalsResults[fleet])delete comp.finalsResults[fleet][ri];
+  await api(`/api/competitions/${comp.id}/finals/results/${fleet}/${ri}`,{method:'DELETE'});
+  toast('Tyhjennetty');render();
+}
+
+function renderFinalsAika(){
+  const el=document.getElementById('p-aika');if(activeTab!=='p-aika')return;
+  const fns=getFleetNames();
+  let h='';
+  fns.forEach(f=>{
+    const sched=comp.finalsSchedule[f];
+    h+=`<div class="fleet-card"><div class="fleet-title"><span class="fleet-badge ${fleetBadgeClass(f)}">${fleetLabel(f)}</span></div>`;
+    if(!sched||!sched.length){h+='<p style="color:var(--muted);font-size:.8rem">Ei vielä generoitu</p></div>';return}
+    h+='<div class="tbl-wrap"><table><tr><th>Kisa</th>';
+    comp.boats.forEach(b=>h+=`<th>${esc(b.name)}</th>`);
+    h+='<th></th></tr>';
+    for(let r=0;r<sched.length;r++){
+      const race=sched[r];const fr=comp.finalsResults[f]||{};
+      const d=fr[r]&&Object.keys(fr[r]).length>=comp.num_boats;
+      h+=`<tr><td style="font-weight:700">${r+1}</td>`;
+      comp.boats.forEach(b=>h+=`<td>${esc(sName(race[b.boat_key]))}</td>`);
+      h+=`<td>${d?'<span style="color:var(--green)">✓</span>':'—'}</td></tr>`;
     }
-    h += '</tr>';
+    h+='</table></div></div>';
   });
-  h += '</table></div>';
-  el.innerHTML = h;
+  el.innerHTML=h;
 }
 
-/* --- Tulosten syöttö --- */
-let curRace = -1;
-
-function nextUndone() {
-  for (let r = 0; r < 20; r++) {
-    if (!results[r] || Object.keys(results[r]).length < 4) return r;
-  }
-  return 19;
+// ===== SETTINGS =====
+function renderAsetus(){
+  const el=document.getElementById('p-asetus');if(activeTab!=='p-asetus')return;
+  let h='<div class="sec-title">Purjehtijoiden nimet</div>';
+  comp.sailors.forEach(s=>{
+    h+=`<div class="name-row"><label>${s.sailor_key}</label><input type="text" value="${esc(s.name)}" data-sk="${s.sailor_key}" class="si" maxlength="20"></div>`;
+  });
+  h+=`<button class="btn-save" style="width:100%;margin-top:8px" onclick="saveSailors()">Tallenna nimet</button>`;
+  h+='<div class="sec-title">Veneiden nimet</div>';
+  comp.boats.forEach(b=>{
+    h+=`<div class="name-row"><label>${b.boat_key}</label><input type="text" value="${esc(b.name)}" data-bk="${b.boat_key}" class="bi" maxlength="20"></div>`;
+  });
+  h+=`<button class="btn-save" style="width:100%;margin-top:8px" onclick="saveBoats()">Tallenna veneet</button>`;
+  el.innerHTML=h;
 }
 
-function renderSyotto() {
-  const el = document.getElementById('p-syotto');
-  if (curRace < 0) curRace = nextUndone();
-
-  let h = '<div class="input-card"><h3>Syötä kisatulokset</h3>';
-  h += '<div class="race-sel"><select id="rsel" onchange="curRace=+this.value;renderSyotto()">';
-  for (let r = 0; r < 20; r++) {
-    const d = results[r] && Object.keys(results[r]).length === 4;
-    h += `<option value="${r}" ${r===curRace?'selected':''}>Kisa ${r+1}${d?' ✓':''}</option>`;
-  }
-  h += '</select></div>';
-
-  const race = schedule[curRace];
-  const ex = results[curRace] || {};
-
-  h += '<div class="boat-grid">';
-  [1,2,3,4].forEach(b => {
-    const sid = race[b];
-    const cp = ex[sid];
-    h += `<div class="boat-cell">`;
-    h += `<div class="boat-name">${bName(b)}</div>`;
-    h += `<div class="sailor-name">${sName(sid)}</div>`;
-    h += '<div class="pos-row">';
-    for (let p = 1; p <= 4; p++) {
-      h += `<button class="pos-btn p${p}${cp===p?' sel':''}" onclick="setPos(${curRace},'${sid}',${p})">${p}</button>`;
-    }
-    h += '</div></div>';
-  });
-  h += '</div>';
-
-  h += '<div class="btn-row">';
-  h += `<button class="btn-save" onclick="saveRace(${curRace})">Tallenna kisa ${curRace+1}</button>`;
-  h += `<button class="btn-clear" onclick="clearRace(${curRace})">Tyhjennä</button>`;
-  h += '</div></div>';
-  el.innerHTML = h;
+async function saveSailors(){
+  const data=[];document.querySelectorAll('.si').forEach(inp=>{data.push({sailor_key:inp.dataset.sk,name:inp.value.trim()||inp.dataset.sk})});
+  await api(`/api/competitions/${comp.id}/sailors`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  comp.sailors=data.map(d=>({sailor_key:d.sailor_key,name:d.name}));
+  toast('Nimet tallennettu!');render();
 }
 
-function setPos(ri, sid, pos) {
-  if (!results[ri]) results[ri] = {};
-  // Remove duplicate position
-  Object.keys(results[ri]).forEach(s => {
-    if (results[ri][s] === pos && s !== sid) delete results[ri][s];
-  });
-  results[ri][sid] = pos;
-  renderSyotto();
+async function saveBoats(){
+  const data=[];document.querySelectorAll('.bi').forEach(inp=>{data.push({boat_key:parseInt(inp.dataset.bk),name:inp.value.trim()||`Vene ${inp.dataset.bk}`})});
+  await api(`/api/competitions/${comp.id}/boats`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  comp.boats=data;toast('Veneet tallennettu!');render();
 }
 
-async function saveRace(ri) {
-  const race = schedule[ri];
-  const r = results[ri] || {};
-  const sailors = Object.values(race);
-  const assigned = sailors.filter(s => r[s] !== undefined);
-  if (assigned.length < 4) { toast('Anna sijoitus kaikille!'); return; }
-  const pv = assigned.map(s => r[s]).sort();
-  if (JSON.stringify(pv) !== '[1,2,3,4]') { toast('Sijoitusten pitää olla 1-4!'); return; }
-
-  await api(`/api/results/${ri}`, {
-    method: 'PUT',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(r),
-  });
-  toast(`Kisa ${ri+1} tallennettu!`);
-  renderAll();
-}
-
-async function clearRace(ri) {
-  delete results[ri];
-  await api(`/api/results/${ri}`, { method: 'DELETE' });
-  toast(`Kisa ${ri+1} tyhjennetty`);
-  renderAll();
-}
-
-/* --- Aikataulu --- */
-function renderAika() {
-  const el = document.getElementById('p-aika');
-  let h = '<div class="tbl-wrap"><table><tr><th>Kisa</th>';
-  [1,2,3,4].forEach(b => h += `<th>${bName(b)}</th>`);
-  h += '<th>Tauolla</th><th>Tila</th></tr>';
-
-  for (let r = 0; r < 20; r++) {
-    const race = schedule[r];
-    const done = results[r] && Object.keys(results[r]).length === 4;
-    const inR = Object.values(race);
-    const rest = SAILOR_IDS.filter(s => !inR.includes(s)).map(sName).join(', ');
-    h += `<tr><td style="font-weight:700">${r+1}</td>`;
-    [1,2,3,4].forEach(b => h += `<td>${sName(race[b])}</td>`);
-    h += `<td style="color:var(--muted);font-size:.72rem">${rest}</td>`;
-    h += `<td>${done?'<span style="color:var(--green)">✓</span>':'—'}</td></tr>`;
-  }
-  h += '</table></div>';
-  el.innerHTML = h;
-}
-
-/* --- Päiväohjelma --- */
-function renderPaiva() {
-  const el = document.getElementById('p-paiva');
-  let h = '<div class="tbl-wrap"><table><tr><th class="sticky-col">Nimi</th>';
-  for (let r = 0; r < 20; r++) {
-    const d = results[r] && Object.keys(results[r]).length === 4;
-    h += `<th class="${d?'hdr-done':''}">${r+1}</th>`;
-  }
-  h += '<th>Yht</th><th>Putki</th><th>Tauko</th></tr>';
-
-  SAILOR_IDS.forEach(sid => {
-    h += `<tr><td class="sticky-col name-col">${sName(sid)}</td>`;
-    let streak=0,mxS=0,gap=0,mxG=0,cnt=0;
-    for (let r = 0; r < 20; r++) {
-      const race = schedule[r];
-      const inR = Object.values(race).includes(sid);
-      const done = results[r] && Object.keys(results[r]).length === 4;
-      if (inR) {
-        cnt++; streak++; mxS=Math.max(mxS,streak); gap=0;
-        const boat = [1,2,3,4].find(b => race[b]===sid);
-        h += `<td class="${done?'cell-done':'cell-sail'}">${bName(boat).substring(0,3)}</td>`;
-      } else {
-        gap++; mxG=Math.max(mxG,gap); streak=0;
-        h += '<td class="cell-rest">·</td>';
-      }
-    }
-    h += `<td>${cnt}</td><td>${mxS}</td><td>${mxG}</td></tr>`;
-  });
-  h += '</table></div>';
-  el.innerHTML = h;
-}
-
-/* --- Asetukset --- */
-function renderAsetus() {
-  const el = document.getElementById('p-asetus');
-  let h = '<div class="section-title">Purjehtijoiden nimet</div>';
-  sailors.forEach(s => {
-    h += `<div class="name-row"><label>${s.id}</label>`;
-    h += `<input type="text" value="${esc(s.name)}" data-sid="${s.id}" class="sailor-inp" maxlength="20"></div>`;
-  });
-  h += `<button class="btn-save" style="width:100%;margin-top:8px" onclick="saveSailors()">Tallenna nimet</button>`;
-
-  h += '<div class="section-title">Veneiden nimet</div>';
-  boats.forEach(b => {
-    h += `<div class="name-row"><label>${b.id}</label>`;
-    h += `<input type="text" value="${esc(b.name)}" data-bid="${b.id}" class="boat-inp" maxlength="20"></div>`;
-  });
-  h += `<button class="btn-save" style="width:100%;margin-top:8px" onclick="saveBoats()">Tallenna veneet</button>`;
-
-  el.innerHTML = h;
-}
-
-function esc(s) { return s.replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
-
-async function saveSailors() {
-  const inps = document.querySelectorAll('.sailor-inp');
-  const data = [];
-  inps.forEach(inp => {
-    const id = inp.dataset.sid;
-    const name = inp.value.trim() || id;
-    data.push({id, name});
-  });
-  await api('/api/sailors', {
-    method:'PUT', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(data),
-  });
-  sailors = data;
-  toast('Nimet tallennettu!');
-  renderAll();
-}
-
-async function saveBoats() {
-  const inps = document.querySelectorAll('.boat-inp');
-  const data = [];
-  inps.forEach(inp => {
-    const id = parseInt(inp.dataset.bid);
-    const name = inp.value.trim() || `Vene ${id}`;
-    data.push({id, name});
-  });
-  await api('/api/boats', {
-    method:'PUT', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(data),
-  });
-  boats = data;
-  toast('Veneet tallennettu!');
-  renderAll();
-}
-
-/* ===== INIT ===== */
-loadAll();
+// Init
+showCompList();
 </script>
 </body>
 </html>

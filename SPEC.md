@@ -1,134 +1,195 @@
-# Purjehduskilpailu — Sovellus-spesifikaatio
+# Purjehdus — Sovellus-spesifikaatio v2
 
 ## Yleiskatsaus
-Mobiilioptimoitu web-sovellus purjehduskilpailujen hallintaan. 10 purjehtijaa, 4 venettä, 20 kisaa. Sovellus laskee automaattisesti optimoidun aikataulun ja pitää kirjaa tuloksista reaaliajassa.
+Mobiilioptimoitu web-sovellus purjehduskilpailujen hallintaan. Tukee useita kilpailuja rinnakkain, dynaamista purjehtija/venemäärää ja finaalisarjaa fleet-mallilla.
 
 ## Tekniset valinnat
-- **Frontend**: Vanilla HTML/CSS/JS (ei frameworkia — kevyt, nopea)
+- **Frontend**: Vanilla HTML/CSS/JS (ei frameworkia — kevyt, nopea, alle 50KB)
 - **Backend**: Node.js + Express (JSON API)
-- **Tietokanta**: SQLite (yksinkertainen, ei tarvita erillistä palvelinta)
-- **Deploy**: Fly.io (Dockerfile)
-- **Ei ulkoisia riippuvuuksia frontendissä** — toimii offline-tilassa
+- **Tietokanta**: SQLite (better-sqlite3)
+- **Deploy**: Fly.io (Dockerfile, persistent volume)
 
-## Toiminnot
+---
 
-### 1. Purjehtijoiden hallinta
-- Sovellus käynnistyy purjehtijoiden nimet -näkymällä
-- Oletusnimet A-J, käyttäjä voi muokata kaikkia nimiä
-- Nimi = lyhyt tunniste (esim. "Jukka", "Mikko") + vapaaehtoinen pidempi nimi
-- Nimet tallentuvat pysyvästi palvelimelle (SQLite)
-- Nimet näkyvät kaikissa taulukoissa ja näkymissä
+## Kilpailumalli
 
-### 2. Kisaaikataulu (automaattinen)
-- Optimoitu Python-algoritmilla (esilastattu kiinteä aikataulu)
-- Jokaisella purjehtijalla 8 kisaa / 20 kisasta
-- Veneet jakautuvat tasaisesti (2x per vene per purjehtija)
-- Ei pitkiä putkia (max 2 peräkkäistä) eikä pitkiä taukoja (max 3)
-- Kaikki 45 mahdollista paria kohtaavat toisensa
+### Kilpailun luonti
+- Nimi (esim. "Astree Hyppeis Challenge")
+- Päivämäärä
+- Purjehtijamäärä: 4–12
+- Venemäärä: 2–4
+- Kisoja alkusarjassa: automaattisesti laskettu tai käsin asetettu
 
-### 3. Tulosten syöttö (mobiilioptimoitu)
-- Isot kosketusalueet (min 44x44px)
-- Valitse kisa → näytä 4 venettä ja purjehtijat
-- Sijoitus 1-4 yhdellä napautuksella per purjehtija
-- Validointi: kaikki 4 sijoitusta pitää antaa, ei duplikaatteja
-- Tallenna-nappi → välitön päivitys tulostaulukkoon
-- Mahdollisuus muokata/poistaa jo syötettyä tulosta
+### Alkusarja
+- Jokainen purjehtija purjehtii mahdollisimman monta kisaa tasaisesti
+- Veneet jakautuvat tasaisesti per purjehtija
+- Vastakkainasettelut jakautuvat mahdollisimman tasaisesti
+- Jaksotus: ei pitkiä putkia eikä pitkiä taukoja
+- Aikataulu generoidaan palvelimella kilpailun luonnissa
 
-### 4. Tulostaulu (päänäkymä)
-- Reaaliaikainen sorttaus: vähiten pisteitä ylimpänä
-- Pisteytys: 1. sija = 1p, 2. sija = 2p, 3. sija = 3p, 4. sija = 4p
-- Tiebreak: enemmän 1. sijoja voittaa
-- Näyttää jokaisen kisan tuloksen per purjehtija
-- Kultaa/hopeaa/pronssia top-3:lle
-- Scrollattava vaakasuunnassa mobiililla (kisakolumnit)
+### Pisteytys
+- 1. sija = 1 piste, 2. sija = 2 pistettä, ..., N. sija = N pistettä
+- Vähiten pisteitä voittaa
+- Tiebreak: eniten 1. sijoja → eniten 2. sijoja → eniten 3. sijoja
 
-### 5. Päiväohjelma
-- Visuaalinen grid: purjehtija × kisa
-- Näyttää millä veneellä purjehtii / onko tauolla
-- Värikoodit: purjehdittu ✓, tulossa, tauko
-- Helppo seurata omaa päivää
+---
 
-### 6. Tilastot
-- Venejakauma per purjehtija
-- Sijoitusjakauma (montako 1./2./3./4. sijaa)
-- Keskiarvo per purjehtija
-- Parimatriisi (kohtaamiskerrat)
+## Finaalisarja
 
-## Mobiilioptimointi
+### Fleet-malli
+Fleettien määrä riippuu purjehtija- ja venemäärästä:
+- Jokainen fleet = venemäärän verran purjehtijia
+- Fleetit nimetään: Bronze, Silver, Gold (alhaalta ylös)
+- Jos purjehtijat eivät jakaudu tasan: alin fleet saa loput
 
-### Layout
-- Mobile-first suunnittelu (min-width: 320px)
-- Tabs-navigaatio alalaidassa (thumb zone)
-- Sticky header pistetilanteella
-- Full-width kortit, ei sivumarginaaleja mobiililla
-- Vaakasuuntainen scroll taulukoissa
+Esimerkki (10 purjehtijaa, 4 venettä):
+- Bronze: sijat 7–10 (4 purjehtijaa)
+- Silver: sijat 4–6 + bronze voittaja (4 purjehtijaa)
+- Gold: sijat 1–3 + silver voittaja (4 purjehtijaa)
 
-### Touch
-- Kaikki interaktiiviset elementit min 44x44px
-- Swipe tuki tab-vaihtoon (valinnainen)
-- Ei hover-riippuvaisia elementtejä
-- Pull-to-refresh (valinnainen)
+### Fleet-kilpailu
+- Joka fleetissä purjehditaan venemäärän verran kisoja
+- Jokainen purjehtii jokaisella veneellä täsmälleen kerran (Latin square)
+- Veneiden jako arvotaan (satunnainen Latin square)
 
-### Suorituskyky
-- Ei frameworkia → alle 50KB kokonaiskoko
-- Inline CSS/JS → yksi HTTP-pyyntö
-- Toimii hitailla yhteyksillä (satamassa!)
+### Eteneminen
+- Fleetit purjehditaan järjestyksessä: Bronze → Silver → Gold
+- Jokaisen fleetin voittaja (vähiten pisteitä) nousee ylempään fleettiin
+- Fleetin muut purjehtijat saavat lopullisen sijoituksensa fleetin tulosten perusteella
+
+### Lopullinen kokonaissijoitus
+- Gold fleet: sijat 1–N (N = venemäärä)
+- Silver fleet (paitsi voittaja): seuraavat sijat
+- Bronze fleet (paitsi voittaja): seuraavat sijat
+- Jne. alaspäin
+
+---
+
+## Tietokantarakenne
+
+### competitions
+| Kenttä | Tyyppi | Kuvaus |
+|--------|--------|--------|
+| id | INTEGER PK | Autoincrement |
+| name | TEXT | Kilpailun nimi |
+| date | TEXT | Päivämäärä (YYYY-MM-DD) |
+| num_sailors | INTEGER | Purjehtijamäärä (4–12) |
+| num_boats | INTEGER | Venemäärä (2–4) |
+| num_races | INTEGER | Kisoja alkusarjassa |
+| created_at | TEXT | Luontiaika |
+
+### comp_sailors
+| Kenttä | Tyyppi | Kuvaus |
+|--------|--------|--------|
+| comp_id | INTEGER FK | Kilpailu |
+| sailor_key | TEXT | Tunniste (A, B, C...) |
+| name | TEXT | Purjehtijan nimi |
+| PK | | (comp_id, sailor_key) |
+
+### comp_boats
+| Kenttä | Tyyppi | Kuvaus |
+|--------|--------|--------|
+| comp_id | INTEGER FK | Kilpailu |
+| boat_key | INTEGER | Veneen numero (1, 2, 3...) |
+| name | TEXT | Veneen nimi |
+| PK | | (comp_id, boat_key) |
+
+### comp_schedule
+| Kenttä | Tyyppi | Kuvaus |
+|--------|--------|--------|
+| comp_id | INTEGER FK | Kilpailu |
+| race_index | INTEGER | Kisan numero (0-based) |
+| boat_key | INTEGER | Vene |
+| sailor_key | TEXT | Purjehtija |
+| PK | | (comp_id, race_index, boat_key) |
+
+### comp_results
+| Kenttä | Tyyppi | Kuvaus |
+|--------|--------|--------|
+| comp_id | INTEGER FK | Kilpailu |
+| race_index | INTEGER | Kisan numero |
+| sailor_key | TEXT | Purjehtija |
+| position | INTEGER | Sijoitus (1–N) |
+| PK | | (comp_id, race_index, sailor_key) |
+
+### finals_schedule
+| Kenttä | Tyyppi | Kuvaus |
+|--------|--------|--------|
+| comp_id | INTEGER FK | Kilpailu |
+| fleet | TEXT | 'bronze', 'silver', 'gold' |
+| race_index | INTEGER | 0-based |
+| boat_key | INTEGER | Vene |
+| sailor_key | TEXT | Purjehtija |
+| PK | | (comp_id, fleet, race_index, boat_key) |
+
+### finals_results
+| Kenttä | Tyyppi | Kuvaus |
+|--------|--------|--------|
+| comp_id | INTEGER FK | Kilpailu |
+| fleet | TEXT | Fleet |
+| race_index | INTEGER | 0-based |
+| sailor_key | TEXT | Purjehtija |
+| position | INTEGER | Sijoitus |
+| PK | | (comp_id, fleet, race_index, sailor_key) |
+
+---
 
 ## API-rajapinta
 
-### GET /api/sailors
-Palauttaa purjehtijoiden nimet.
-```json
-[{"id": "A", "name": "Jukka"}, ...]
-```
+### Kilpailut
+- `GET /api/competitions` — listaa kaikki
+- `POST /api/competitions` — luo uusi (body: {name, date, num_sailors, num_boats, num_races, sailors:[], boats:[]})
+- `GET /api/competitions/:id` — kilpailun kaikki data (tiedot, purjehtijat, veneet, aikataulu, tulokset, finaalit)
+- `DELETE /api/competitions/:id` — poista kilpailu
 
-### PUT /api/sailors
-Päivittää purjehtijoiden nimet.
-```json
-[{"id": "A", "name": "Jukka"}, ...]
-```
+### Purjehtijat ja veneet
+- `PUT /api/competitions/:id/sailors` — päivitä nimet
+- `PUT /api/competitions/:id/boats` — päivitä nimet
 
-### GET /api/results
-Palauttaa kaikki tulokset.
-```json
-{"0": {"A": 1, "E": 2, "G": 3, "I": 4}, ...}
-```
+### Tulokset
+- `PUT /api/competitions/:id/results/:raceIndex` — tallenna kisan tulos
+- `DELETE /api/competitions/:id/results/:raceIndex` — poista tulos
 
-### PUT /api/results/:raceIndex
-Tallentaa yhden kisan tulokset.
-```json
-{"A": 1, "E": 2, "G": 3, "I": 4}
-```
+### Finaali
+- `POST /api/competitions/:id/finals/generate/:fleet` — generoi fleetin aikataulu
+- `PUT /api/competitions/:id/finals/results/:fleet/:raceIndex` — tallenna finaali tulos
+- `DELETE /api/competitions/:id/finals/results/:fleet/:raceIndex` — poista
+- `GET /api/competitions/:id/finals/standings` — finaali sijoitukset
 
-### DELETE /api/results/:raceIndex
-Poistaa yhden kisan tulokset.
+---
 
-### GET /api/schedule
-Palauttaa kisaaikataulun.
+## Aikataulu-algoritmi (server-side JavaScript)
 
-## Tiedostorakenne
-```
-purjehdus/
-├── server.js          # Express-palvelin + API
-├── public/
-│   └── index.html     # Frontend (kaikki inline)
-├── data/
-│   └── purjehdus.db   # SQLite-tietokanta (runtime)
-├── Dockerfile
-├── fly.toml
-├── package.json
-├── purjehdus.py       # Aikataulun generointi (kehitystyökalu)
-└── SPEC.md
-```
+### Alkusarjan generointi
+Siirretty Python-algoritmista JavaScriptiin:
+1. Ahne valinta: huomioi osallistumiset, paritasaisuus, jaksotus
+2. Iteratiivinen optimointi (tuhansia yrityksiä, paras valitaan)
+3. Venejakauman optimointi permutaatiohaulla
 
-## Fly.io Deploy
-- Dockerfile: Node.js 20 alpine
-- Persistent volume: /app/data (SQLite)
-- Portti: 3000
-- Yksi instanssi (SQLite ei tue monireplicaa)
+### Finaali Latin square
+- 4×4 syklinen Latin square, rivit/sarakkeet/arvot satunnaistettu
+- Takaa: jokainen purjehtija jokaisella veneellä kerran
 
-## Rajoitukset (v1)
-- Yksi kilpailu kerrallaan
-- Kiinteä 10/4/20 konfiguraatio
-- Ei käyttäjäautentikointia (kaikki voivat syöttää tuloksia)
-- Ei reaaliaikaista synkronointia (refresh näyttää uusimman tilan)
+---
+
+## Frontend
+
+### Näkymät
+1. **Kilpailulista** — kaikki kilpailut, uuden luonti
+2. **Alkusarja** — tulostaulu, tulosten syöttö, aikataulu, päiväohjelma
+3. **Finaalisarja** — fleet-välilehdet, tulosten syöttö, eteneminen, kokonaissijoitus
+4. **Asetukset** — purjehtijoiden ja veneiden nimien muokkaus
+
+### Mobiilioptimointi
+- Bottom nav (thumb zone)
+- Min 44×44px kosketusalueet
+- Vaakasuuntainen scroll taulukoissa
+- Sticky-sarakkeet (nimi/sija)
+- Safe area tuki (notch)
+
+---
+
+## Migraatio
+Nykyinen data ("Astree Hyppeis Challenge" 16.5.2026) siirretään automaattisesti:
+- Vanhat sailors/boats/results → uusi skeema competition_id=1 alle
+- Kiinteä aikataulu → comp_schedule tauluun
