@@ -72,6 +72,13 @@ db.exec(`
     PRIMARY KEY (comp_id, fleet, race_index, sailor_key),
     FOREIGN KEY (comp_id) REFERENCES competitions(id) ON DELETE CASCADE
   );
+  CREATE TABLE IF NOT EXISTS finals_templates (
+    comp_id INTEGER NOT NULL,
+    fleet TEXT NOT NULL,
+    template TEXT NOT NULL,
+    PRIMARY KEY (comp_id, fleet),
+    FOREIGN KEY (comp_id) REFERENCES competitions(id) ON DELETE CASCADE
+  );
 `);
 
 // ===== MIGRAATIO: vanha data → uusi skeema =====
@@ -136,6 +143,36 @@ function migrateOldData() {
   console.log('Migration complete.');
 }
 migrateOldData();
+
+// Seed Astree Hyppeis Challenge finals templates
+(function seedFinalsTemplates() {
+  const comp = db.prepare("SELECT id FROM competitions WHERE name = 'Astree Hyppeis Challenge'").get();
+  if (!comp) return;
+  const existing = db.prepare('SELECT COUNT(*) as c FROM finals_templates WHERE comp_id = ?').get(comp.id);
+  if (existing.c > 0) return;
+
+  const ins = db.prepare('INSERT OR IGNORE INTO finals_templates (comp_id, fleet, template) VALUES (?, ?, ?)');
+
+  // Bronze: already set manually, no template needed (random or manual override)
+
+  // Silver: Jugi=C, Jukkis=B, Sammen=F, W=pronssin voittaja
+  ins.run(comp.id, 'silver', JSON.stringify([
+    {"1":"C","2":"B","3":"F","4":"W"},
+    {"1":"W","2":"C","3":"B","4":"F"},
+    {"1":"F","2":"W","3":"C","4":"B"},
+    {"1":"B","2":"F","3":"W","4":"C"}
+  ]));
+
+  // Gold: Kimmo=A, Heikki=I, Thumppi=D, W=hopean voittaja
+  ins.run(comp.id, 'gold', JSON.stringify([
+    {"1":"A","2":"I","3":"D","4":"W"},
+    {"1":"W","2":"A","3":"I","4":"D"},
+    {"1":"D","2":"W","3":"A","4":"I"},
+    {"1":"I","2":"D","3":"W","4":"A"}
+  ]));
+
+  console.log('Astree Hyppeis Challenge finals templates seeded.');
+})();
 
 // ===== SCHEDULE ALGORITHM =====
 const SAILOR_KEYS = 'ABCDEFGHIJKL'.split('');
@@ -541,8 +578,39 @@ app.post('/api/competitions/:id/finals/generate/:fleet', (req, res) => {
     return res.status(400).json({ error: `Fleet size mismatch: got ${fleetSailors.length}, expected ${comp.num_boats}` });
   }
 
-  // Generate Latin square
-  const latinSquare = generateLatinSquare(fleetSailors, comp.num_boats);
+  // Generate schedule: use saved template, body template, or random Latin square
+  let latinSquare;
+
+  // Check for saved template in DB first, then body, then random
+  let template = null;
+  const savedTemplate = db.prepare('SELECT template FROM finals_templates WHERE comp_id = ? AND fleet = ?').get(compId, fleet);
+  if (req.body && Array.isArray(req.body.schedule)) {
+    template = req.body.schedule;
+  } else if (savedTemplate) {
+    template = JSON.parse(savedTemplate.template);
+  }
+
+  if (template) {
+    // Resolve "W" to the advancing winner's key from previous fleet
+    const prevFleetIdx = fleetNames.indexOf(fleet) - 1;
+    let winnerKey = null;
+    if (prevFleetIdx >= 0) {
+      const prevFleet = fleetNames[prevFleetIdx];
+      const prevResults = db.prepare('SELECT race_index, sailor_key, position FROM finals_results WHERE comp_id = ? AND fleet = ?').all(compId, prevFleet);
+      const prevSched = db.prepare('SELECT DISTINCT sailor_key FROM finals_schedule WHERE comp_id = ? AND fleet = ?').all(compId, prevFleet).map(r => r.sailor_key);
+      const prevStandings = computeStandings(prevSched, prevResults);
+      winnerKey = prevStandings[0].key;
+    }
+    latinSquare = template.map(race => {
+      const mapped = {};
+      Object.entries(race).forEach(([boat, sid]) => {
+        mapped[boat] = sid === 'W' ? winnerKey : sid;
+      });
+      return mapped;
+    });
+  } else {
+    latinSquare = generateLatinSquare(fleetSailors, comp.num_boats);
+  }
 
   // Store
   const tx = db.transaction(() => {
@@ -558,6 +626,27 @@ app.post('/api/competitions/:id/finals/generate/:fleet', (req, res) => {
   tx();
 
   res.json({ schedule: latinSquare, sailors: fleetSailors });
+});
+
+// Manual finals schedule override
+app.put('/api/competitions/:id/finals/schedule/:fleet', (req, res) => {
+  const compId = parseInt(req.params.id);
+  const fleet = req.params.fleet;
+  const schedule = req.body; // array of {boat_key: sailor_key}
+  if (!Array.isArray(schedule)) return res.status(400).json({ error: 'Array expected' });
+
+  const tx = db.transaction(() => {
+    db.prepare('DELETE FROM finals_schedule WHERE comp_id = ? AND fleet = ?').run(compId, fleet);
+    db.prepare('DELETE FROM finals_results WHERE comp_id = ? AND fleet = ?').run(compId, fleet);
+    const ins = db.prepare('INSERT INTO finals_schedule (comp_id, fleet, race_index, boat_key, sailor_key) VALUES (?,?,?,?,?)');
+    schedule.forEach((race, ri) => {
+      Object.entries(race).forEach(([boat, sailor]) => {
+        ins.run(compId, fleet, ri, parseInt(boat), sailor);
+      });
+    });
+  });
+  tx();
+  res.json({ ok: true });
 });
 
 function getFleetSailors(comp, fleetNames, fleet, qualStandings, compId) {
